@@ -14,7 +14,7 @@ import org.apache.shiro.realm.Realm;
  * @author zhangjiawei
  *
  */
-public class MyRealm1 implements Realm{
+public class MyRealm3 implements Realm{
 
 	@Override
 	public AuthenticationInfo getAuthenticationInfo(AuthenticationToken token) throws AuthenticationException {
@@ -29,17 +29,16 @@ public class MyRealm1 implements Realm{
 			throw new IncorrectCredentialsException();
 		}
 		//认证成功 返回一个Authentication的实现
-		return new SimpleAuthenticationInfo(username, password, getName());
+		return new SimpleAuthenticationInfo(username + "@163.com", password, getName());
 	}
 
 	@Override
 	public String getName() {
-		return "myRealm1";
+		return "myRealm3";
 	}
 
 	@Override
 	public boolean supports(AuthenticationToken token) {
-		// 仅支持usernamePasswordToken
 		return token instanceof UsernamePasswordToken;
 	}
 

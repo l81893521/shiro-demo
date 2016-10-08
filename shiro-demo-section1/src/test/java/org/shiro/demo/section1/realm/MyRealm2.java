@@ -9,6 +9,11 @@ import org.apache.shiro.authc.UnknownAccountException;
 import org.apache.shiro.authc.UsernamePasswordToken;
 import org.apache.shiro.realm.Realm;
 
+/**
+ * 
+ * @author zhangjiawei
+ *
+ */
 public class MyRealm2 implements Realm{
 
 	@Override
