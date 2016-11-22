@@ -60,4 +60,10 @@ Shiro可以非常容易的开发出足够好的应用,其不仅可用在JavaSE�
 **从以上也可以看出，Shiro不提供维护用户/权限，而是通过Realm让开发人员自己注入。**
 
 接下来我们来从Shiro内部来看下Shiro的架构，如下图所示：
+
 ![](https://github.com/l81893521/shiro-demo/blob/master/images/3.png)
+
+**Subject:** 主体，可以看到主体可以是任何可以与应用交互的“用户”
+
+**SecurityManager:** 相当于SpringMVC中的DispatcherServlet或者Struts2中的FilterDispatcher；是Shiro的心脏；
+所有具体的交互都通过SecurityManager进行控制；它管理着所有Subject、且负责进行认证和授权、及会话、缓存的管理
