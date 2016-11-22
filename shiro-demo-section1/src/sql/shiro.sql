@@ -1,7 +1,7 @@
 drop database if exists shiro;
 create database shiro;
 use shiro;
-
+#用户表
 create table users (
   id bigint auto_increment,
   username varchar(100),
@@ -10,7 +10,7 @@ create table users (
   constraint pk_users primary key(id)
 ) charset=utf8 ENGINE=InnoDB;
 create unique index idx_users_username on users(username);
-
+#用户/角色
 create table user_roles(
   id bigint auto_increment,
   username varchar(100),
@@ -18,7 +18,7 @@ create table user_roles(
   constraint pk_user_roles primary key(id)
 ) charset=utf8 ENGINE=InnoDB;
 create unique index idx_user_roles on user_roles(username, role_name);
-
+#角色权限
 create table roles_permissions(
   id bigint auto_increment,
   role_name varchar(100),

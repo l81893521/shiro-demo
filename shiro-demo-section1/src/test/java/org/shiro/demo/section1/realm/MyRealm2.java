@@ -16,7 +16,6 @@ import org.apache.shiro.realm.Realm;
  */
 public class MyRealm2 implements Realm{
 
-	@Override
 	public AuthenticationInfo getAuthenticationInfo(AuthenticationToken token) throws AuthenticationException {
 		String username = (String) token.getPrincipal();
 		String password = new String((char[])token.getCredentials());
@@ -32,12 +31,10 @@ public class MyRealm2 implements Realm{
 		return new SimpleAuthenticationInfo(username, password, getName());
 	}
 
-	@Override
 	public String getName() {
 		return "myRealm2";
 	}
 
-	@Override
 	public boolean supports(AuthenticationToken token) {
 		// 仅支持usernamePasswordToken
 		return token instanceof UsernamePasswordToken;

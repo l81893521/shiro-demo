@@ -41,7 +41,7 @@ public class LoginLogoutTest {
 	
 	@Test
 	public void testCustomRealm(){
-		//1.获取SecurityManagerFactory,此处用shiro.ini来初始化(使用自定义realm)
+		//1.获取SecurityManagerFactory,此处用shiro-realm.ini来初始化(使用自定义realm)
 		Factory<SecurityManager> factory = new IniSecurityManagerFactory("classpath:shiro-realm.ini");
 		//2.得到securityManager实例
 		SecurityManager securityManager = factory.getInstance();
@@ -93,7 +93,7 @@ public class LoginLogoutTest {
 	
 	@Test
 	public void testJDBCRealm(){
-		//1.获取SecurityManagerFactory,此处用shiro.ini来初始化(使用自定义realm)
+		//1.获取SecurityManagerFactory,此处用shiro-jdbc-realm.ini来初始化(使用自定义realm)
 		Factory<SecurityManager> factory = new IniSecurityManagerFactory("classpath:shiro-jdbc-realm.ini");
 		//2.得到securityManager实例
 		SecurityManager securityManager = factory.getInstance();
