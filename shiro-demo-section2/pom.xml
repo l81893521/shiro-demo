@@ -8,8 +8,8 @@
 		<artifactId>shiro-demo</artifactId>
 		<version>0.0.1-SNAPSHOT</version>
 	</parent>
-	<artifactId>shiro-demo-section1</artifactId>
-	<name>shiro-demo-section1</name>
+	<artifactId>shiro-demo-section2</artifactId>
+	<name>shiro-demo-section2</name>
 	<url>http://maven.apache.org</url>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
