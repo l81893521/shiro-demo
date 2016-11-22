@@ -38,3 +38,26 @@ Shiro可以非常容易的开发出足够好的应用,其不仅可用在JavaSE�
 
 首先，我们从外部来看Shiro吧，即从应用程序角度的来观察如何使用Shiro完成工作。如下图：
 ![](https://github.com/l81893521/shiro-demo/blob/master/images/2.png)
+
+可以看到：应用代码直接交互的对象是Subject，也就是说Shiro的对外API核心就是Subject；其每个API的含义：
+
+**Subject:** 主体，代表了当前“用户”，这个用户不一定是一个具体的人，与当前应用交互的任何东西都是Subject，
+如网络爬虫，机器人等；即一个抽象概念；所有Subject都绑定到SecurityManager，与Subject的所有交互都会委托给SecurityManager；
+可以把Subject认为是一个门面；SecurityManager才是实际的执行者
+
+**SecurityManager:** 安全管理器；即所有与安全有关的操作都会与SecurityManager交互；
+且它管理着所有Subject；可以看出它是Shiro的核心，它负责与后边介绍的其他组件进行交互，
+如果学习过SpringMVC，你可以把它看成DispatcherServlet前端控制器
+
+**Realm:** 域，Shiro从从Realm获取安全数据（如用户、角色、权限），就是说SecurityManager要验证用户身份，
+那么它需要从Realm获取相应的用户进行比较以确定用户身份是否合法；也需要从Realm得到用户相应的角色/权限进行验证用户是否能进行操作；
+可以把Realm看成DataSource，即安全数据源。
+
+也就是说对于我们而言，最简单的一个Shiro应用：
+1. 应用代码通过Subject来进行认证和授权，而Subject又委托给SecurityManager
+2. 我们需要给Shiro的SecurityManager注入Realm，从而让SecurityManager能得到合法的用户及其权限进行判断。
+
+**从以上也可以看出，Shiro不提供维护用户/权限，而是通过Realm让开发人员自己注入。**
+
+接下来我们来从Shiro内部来看下Shiro的架构，如下图所示：
+![](https://github.com/l81893521/shiro-demo/blob/master/images/3.png)
