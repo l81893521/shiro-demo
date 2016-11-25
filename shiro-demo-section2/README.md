@@ -186,3 +186,23 @@ securityManager.realms=$myRealm1
 只需要把之前的shiro.ini配置文件改成shiro-realm.ini即可。
 
 **多Realm配置**
+
+1. 配置文件（shiro-multi-realm.ini）[查看代码](https://github.com/l81893521/shiro-demo/blob/master/shiro-demo-section2/src/test/resources/shiro-multi-realm.ini)
+```
+#声明一个realm
+myRealm1=org.shiro.demo.section1.realm.MyRealm1
+myRealm2=org.shiro.demo.section1.realm.MyRealm2
+#指定securityManager的realm实现
+securityManager.realms=$myRealm1,$myRealm2
+```
+
+securityManager会按照realms指定的顺序进行身份认证。此处我们使用显示指定顺序的方式指定了Realm的顺序
+
+如果删除“securityManager.realms=$myRealm1,$myRealm2”，那么securityManager会按照realm声明的顺序进行使用（即无需设置realms属性，其会自动发现）
+
+当我们显示指定realm后，其他没有指定realm将被忽略，如“securityManager.realms=$myRealm1”，那么myRealm2不会被自动设置进去。
+
+2. 测试用例testCustomMultiRealm方法 [查看代码](https://github.com/l81893521/shiro-demo/blob/master/shiro-demo-section2/src/test/java/org/shiro/demo/section1/LoginLogoutTest.java)
+
+**Shiro默认提供的Realm**
+![](https://github.com/l81893521/shiro-demo/blob/master/shiro-demo-section2/images/2.png)
