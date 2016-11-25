@@ -344,3 +344,27 @@ shiro-authenticator-all-fail.ini与shiro-authenticator-all-success.ini不同的�
 唯一不同点一个是返回所有验证成功的Realm的认证信息；另一个是只返回第一个验证成功的Realm的认证信息。
 
 测试代码 [查看代码](https://github.com/l81893521/shiro-demo/blob/master/shiro-demo-section2/src/test/java/org/shiro/demo/section1/AuthenticatorTest.java)
+
+**自定义AuthenticationStrategy实现，首先看其API**
+```
+/**
+ *在所有Realm验证之前调用
+ */
+AuthenticationInfo beforeAllAttempts(Collection<? extends Realm> realms, AuthenticationToken token)
+    throws AuthenticationException;
+/**
+ *在每个Realm之前调用
+ */
+AuthenticationInfo beforeAttempt(Realm realm, AuthenticationToken token, AuthenticationInfo aggregate)
+    throws AuthenticationException;
+/**
+ *在每个Realm之后调用
+ */
+AuthenticationInfo afterAttempt(Realm realm, AuthenticationToken token, AuthenticationInfo singleRealmInfo, AuthenticationInfo aggregateInfo, Throwable t)
+    throws AuthenticationException;
+/**
+ *在所有Realm之后调用
+ */
+AuthenticationInfo afterAllAttempts(AuthenticationToken token, AuthenticationInfo aggregate)
+    throws AuthenticationException;
+```
