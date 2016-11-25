@@ -205,4 +205,15 @@ securityManager会按照realms指定的顺序进行身份认证。此处我们�
 2. 测试用例testCustomMultiRealm方法 [查看代码](https://github.com/l81893521/shiro-demo/blob/master/shiro-demo-section2/src/test/java/org/shiro/demo/section1/LoginLogoutTest.java)
 
 **Shiro默认提供的Realm**
+
 ![](https://github.com/l81893521/shiro-demo/blob/master/shiro-demo-section2/images/2.png)
+
+以后一般继承**AuthorizingRealm（授权）** 即可
+
+其继承了AuthenticatingRealm（即身份验证），而且也间接继承了CachingRealm（带有缓存实现）。其中主要默认实现如下
+
+* IniRealm : [users]部分指定用户名/密码及其角色；[roles]部分指定角色即权限信息
+* PropertiesRealm : user.username=password,role1,role2指定用户名/密码及其角色；role.role1=permission1,permission2指定角色及权限信息
+* JdbcRealm : 通过sql查询相应的信息,也可以调用相应的api进行自定义sql
+
+**JDBC Realm使用**
