@@ -117,4 +117,56 @@ public void testHelloworld(){
 此处可以配置多个Realm，将按照相应的顺序及策略进行访问
 
 ### 2.5 Realm
+**Realm:** 域，Shiro从从Realm获取安全数据（如用户、角色、权限），就是说SecurityManager要验证用户身份，
+那么它需要从Realm获取相应的用户进行比较以确定用户身份是否合法；也需要从Realm得到用户相应的角色/权限进行验证用户是否能进行操作；
+可以把Realm看成DataSource，即安全数据源。如我们之前的ini配置方式将使用org.apache.shiro.realm.text.IniRealm。
 
+**org.apache.shiro.realm.Realm 接口如下:**
+```
+public interface Realm {
+    /**
+     * 返回一个唯一的Realm名字
+     */
+    String getName();
+    /**
+     * 判断此Realm是否支持此token
+     */
+    boolean supports(AuthenticationToken var1);
+    /**
+     * 根据Token获取认证信息
+     */
+    AuthenticationInfo getAuthenticationInfo(AuthenticationToken var1) throws AuthenticationException;
+}
+```
+
+**单Realm配置:**
+
+1. 自定义Realm实现 [查看代码](https://github.com/l81893521/shiro-demo/blob/master/shiro-demo-section2/src/test/java/org/shiro/demo/section1/realm/MyRealm1.java)
+
+```
+public class MyRealm1 implements Realm{
+    public AuthenticationInfo getAuthenticationInfo(AuthenticationToken token) throws AuthenticationException {
+        String username = (String) token.getPrincipal();
+        String password = new String((char[])token.getCredentials());
+        if(!"zhang".equals(username)){
+            //用户名错误
+            throw new UnknownAccountException();
+        }
+        if(!"123".equals(password)){
+            //密码错误
+            throw new IncorrectCredentialsException();
+        }
+        //认证成功 返回一个Authentication的实现
+        return new SimpleAuthenticationInfo(username, password, getName());
+    }
+
+    public String getName() {
+        return "myRealm1";
+    }
+
+    public boolean supports(AuthenticationToken token) {
+        // 仅支持usernamePasswordToken
+        return token instanceof UsernamePasswordToken;
+    }
+}
+```
