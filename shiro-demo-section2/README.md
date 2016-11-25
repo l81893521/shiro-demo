@@ -170,3 +170,19 @@ public class MyRealm1 implements Realm{
     }
 }
 ```
+
+2. ini配置文件指定自定义Realm实现(shiro-realm.ini) [查看代码](https://github.com/l81893521/shiro-demo/blob/master/shiro-demo-section2/src/test/resources/shiro-realm.ini)
+```
+#声明一个realm
+myRealm1=org.shiro.demo.section1.realm.MyRealm1
+#指定securityManager的realm实现
+securityManager.realms=$myRealm1
+```
+
+通过$name来引入之前的realm定义
+
+3. 测试用例testCustomRealm方法 [查看代码](https://github.com/l81893521/shiro-demo/blob/master/shiro-demo-section2/src/test/java/org/shiro/demo/section1/LoginLogoutTest.java)
+
+只需要把之前的shiro.ini配置文件改成shiro-realm.ini即可。
+
+**多Realm配置**
