@@ -273,9 +273,9 @@ SecurityManager接口继承了Authenticator，另外还有一个ModularRealmAuth
 **ModularRealmAuthenticator默认使用AtLeastOneSuccessfulStrategy策略**
 
 假设我们有三个realm：
-1. myRealm1： 用户名/密码为zhang/123时成功，且返回身份/凭据为zhang/123
-2. myRealm2： 用户名/密码为wang/123时成功，且返回身份/凭据为wang/123；
-3. myRealm3： 用户名/密码为zhang/123时成功，且返回身份/凭据为zhang@163.com/123，和myRealm1不同的是返回时的身份变了
+* myRealm1： 用户名/密码为zhang/123时成功，且返回身份/凭据为zhang/123
+* myRealm2： 用户名/密码为wang/123时成功，且返回身份/凭据为wang/123；
+* myRealm3： 用户名/密码为zhang/123时成功，且返回身份/凭据为zhang@163.com/123，和myRealm1不同的是返回时的身份变了
 
 [查看代码](https://github.com/l81893521/shiro-demo/tree/master/shiro-demo-section2/src/test/java/org/shiro/demo/section1/realm)
 
