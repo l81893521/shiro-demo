@@ -217,3 +217,39 @@ securityManager会按照realms指定的顺序进行身份认证。此处我们�
 * JdbcRealm : 通过sql查询相应的信息,也可以调用相应的api进行自定义sql
 
 **JDBC Realm使用**
+
+数据库及依赖,本文将使用mysql数据库及druid连接池
+
+```
+<dependency>
+    <groupId>mysql</groupId>
+    <artifactId>mysql-connector-java</artifactId>
+    <version>5.1.38</version>
+</dependency>
+<dependency>
+    <groupId>com.alibaba</groupId>
+    <artifactId>druid</artifactId>
+    <version>1.0.26</version>
+</dependency>
+```
+
+到数据库shiro下建三张表：users（用户名/密码）、user_roles（用户/角色）、roles_permissions（角色/权限），具体请参照shiro.sql [查看代码](https://github.com/l81893521/shiro-demo/blob/master/shiro-demo-section2/src/sql/shiro.sql)
+
+ini配置（shiro-jdbc-realm.ini） [查看代码](https://github.com/l81893521/shiro-demo/blob/master/shiro-demo-section2/src/test/resources/shiro-jdbc-realm.ini)
+```
+jdbcRealm=org.apache.shiro.realm.jdbc.JdbcRealm
+dataSource=com.alibaba.druid.pool.DruidDataSource
+dataSource.driverClassName=com.mysql.jdbc.Driver
+dataSource.url=jdbc:mysql://192.168.31.188:3306/shiro
+dataSource.username=root
+dataSource.password=123456
+jdbcRealm.dataSource=$dataSource
+securityManager.realms=$jdbcRealm
+```
+
+1. 变量名=全限定类名会自动创建一个类实例
+2. 变量名.属性=值 自动调用相应的setter方法进行赋值
+3. $变量名 引用之前的一个对象实例
+
+测试用例testJDBCRealm方法 [查看代码](https://github.com/l81893521/shiro-demo/blob/master/shiro-demo-section2/src/test/java/org/shiro/demo/section1/LoginLogoutTest.java)
+
