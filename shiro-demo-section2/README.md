@@ -253,3 +253,46 @@ securityManager.realms=$jdbcRealm
 
 测试用例testJDBCRealm方法 [查看代码](https://github.com/l81893521/shiro-demo/blob/master/shiro-demo-section2/src/test/java/org/shiro/demo/section1/LoginLogoutTest.java)
 
+### 2.6 Authenticator及AuthenticationStrategy
+Authenticator的职责是验证用户帐号，是Shiro API中身份验证核心的入口点：
+
+```
+public AuthenticationInfo authenticate(AuthenticationToken authenticationToken)
+            throws AuthenticationException;
+```
+如果验证成功，将返回AuthenticationInfo验证信息；此信息中包含了身份及凭证；
+如果验证失败将抛出相应的AuthenticationException实现。
+
+SecurityManager接口继承了Authenticator，另外还有一个ModularRealmAuthenticator实现
+其委托给多个Realm进行验证，验证规则通过AuthenticationStrategy接口指定，默认提供的实现
+
+* FirstSuccessfulStrategy : 只要有一个Realm验证成功即可，只返回第一个Realm身份验证成功的认证信息，其他的忽略
+* AtLeastOneSuccessfulStrategy : 只要有一个Realm验证成功即可，和FirstSuccessfulStrategy不同，返回所有Realm身份验证成功的认证信息
+* AllSuccessfulStrategy : 所有Realm验证成功才算成功，且返回所有Realm身份验证成功的认证信息，如果有一个失败就失败了。
+
+**ModularRealmAuthenticator默认使用AtLeastOneSuccessfulStrategy策略**
+
+假设我们有三个realm：
+1. myRealm1： 用户名/密码为zhang/123时成功，且返回身份/凭据为zhang/123
+2. myRealm2： 用户名/密码为wang/123时成功，且返回身份/凭据为wang/123；
+3. myRealm3： 用户名/密码为zhang/123时成功，且返回身份/凭据为zhang@163.com/123，和myRealm1不同的是返回时的身份变了
+
+[查看代码](https://github.com/l81893521/shiro-demo/tree/master/shiro-demo-section2/src/test/java/org/shiro/demo/section1/realm)
+
+
+shiro-authenticator-all-success.ini配置文件 [查看代码](https://github.com/l81893521/shiro-demo/blob/master/shiro-demo-section2/src/test/resources/shiro-authenticator-all-success.ini)
+```
+#指定securityManager的authenticator实现(ModularRealmAuthenticator默认使用AtLeastOneSuccessfulStrategy策略)
+authenticator=org.apache.shiro.authc.pam.ModularRealmAuthenticator
+securityManager.authenticator=$authenticator
+
+#指定securityManager.authenticator的authenticationStrategy(AllSuccessfulStrategy所有Realm验证成功才算成功，且返回所有Realm身份验证成功的认证信息，如果有一个失败就失败了。)
+allSuccessfulStrategy=org.apache.shiro.authc.pam.AllSuccessfulStrategy
+securityManager.authenticator.authenticationStrategy=$allSuccessfulStrategy
+
+#自定义realm
+myRealm1=org.shiro.demo.section1.realm.MyRealm1
+myRealm2=org.shiro.demo.section1.realm.MyRealm2
+myRealm3=org.shiro.demo.section1.realm.MyRealm3
+securityManager.realms=$myRealm1,$myRealm3
+```
