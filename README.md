@@ -1,5 +1,5 @@
 # shrio-example
-感谢开源教程 : [https://github.com/zhangkaitao/shiro-example](https://github.com/zhangkaitao/shiro-example)
+感谢开源教程 : [博客地址](http://jinnianshilongnian.iteye.com/blog/2018398)
 
 直接开始学习 : [查看第二章代码教程](https://github.com/l81893521/shiro-demo/tree/master/shiro-demo-section2)
 
