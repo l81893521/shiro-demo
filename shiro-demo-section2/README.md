@@ -296,3 +296,51 @@ myRealm2=org.shiro.demo.section1.realm.MyRealm2
 myRealm3=org.shiro.demo.section1.realm.MyRealm3
 securityManager.realms=$myRealm1,$myRealm3
 ```
+
+通用化登录逻辑
+```
+private void login(String configFile, String username, String password){
+    //1.获取SecurityManagerFactory,此处用shiro.ini来初始化(使用自定义realm)
+    Factory<SecurityManager> factory = new IniSecurityManagerFactory(configFile);
+    //2.得到securityManager实例
+    SecurityManager securityManager = factory.getInstance();
+    //3.绑定给securityManager
+    SecurityUtils.setSecurityManager(securityManager);
+    //4.获取subject
+    Subject subject = SecurityUtils.getSubject();
+
+    UsernamePasswordToken token = new UsernamePasswordToken(username, password);
+
+    subject.login(token);
+}
+```
+
+测试AllSuccessfulStrategy成功
+```
+@Test
+public void testAllSuccessfulStrategyWithSuccess(){
+    login("classpath:shiro-authenticator-all-success.ini","zhang","123");
+
+    Subject subject = SecurityUtils.getSubject();
+    //得到一个身份集合，其包含了Realm验证成功的身份信息
+    PrincipalCollection principalCollection = subject.getPrincipals();
+    Assert.assertEquals(2, principalCollection.asList().size());
+}
+```
+
+即PrincipalCollection包含了zhang和zhang@163.com身份信息。
+
+测试AllSuccessfulStrategy失败
+```
+@Test(expected = UnknownAccountException.class)
+public void testAllSuccessfulStrategyWithFail(){
+    login("classpath:shiro-authenticator-all-fail.ini","zhang","123");
+}
+```
+shiro-authenticator-all-fail.ini与shiro-authenticator-all-success.ini不同的配置是使用了securityManager.realms=$myRealm1,$myRealm2；即myRealm验证失败。
+
+对于AtLeastOneSuccessfulStrategy和FirstSuccessfulStrategy的区别
+请参照testAtLeastOneSuccessfulStrategyWithSuccess和testFirstOneSuccessfulStrategyWithSuccess测试方法。
+唯一不同点一个是返回所有验证成功的Realm的认证信息；另一个是只返回第一个验证成功的Realm的认证信息。
+
+测试代码 [查看代码](https://github.com/l81893521/shiro-demo/blob/master/shiro-demo-section2/src/test/java/org/shiro/demo/section1/AuthenticatorTest.java)
