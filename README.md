@@ -1,7 +1,11 @@
 # shrio-example
 感谢开源教程 : [博客地址](http://jinnianshilongnian.iteye.com/blog/2018398)
 
-直接开始学习 : [查看第二章代码教程](https://github.com/l81893521/shiro-demo/tree/master/shiro-demo-section2)
+直接开始学习 :
+
+[查看第二章代码教程-身份验证](https://github.com/l81893521/shiro-demo/tree/master/shiro-demo-section2)
+
+[查看第三章代码教程-授权](https://github.com/l81893521/shiro-demo/tree/master/shiro-demo-section3)
 
 ## 1.1 简介
 Apache shiro是一个java安全框架. 目前, 使用Apache shiro的人越来越多, 因为它相当简单, 对比spring security, 可能没有Spring Security功能强大,
