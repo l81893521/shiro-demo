@@ -103,6 +103,7 @@ public void testHelloworld(){
 
 ### 2.4 身份认证流程
 ![](https://github.com/l81893521/shiro-demo/blob/master/shiro-demo-section2/images/1.png)
+
 1. 首先调用Subject.login(token)进行登录，其会自动委托给Security Manager，调用之前必须通过SecurityUtils. setSecurityManager()设置
 
 2. SecurityManager负责真正的身份验证逻辑；它会委托给Authenticator进行身份验证
@@ -114,3 +115,6 @@ public void testHelloworld(){
 
 5. Authenticator会把相应的token传入Realm，从Realm获取身份验证信息，如果没有返回/抛出异常表示身份验证失败了。
 此处可以配置多个Realm，将按照相应的顺序及策略进行访问
+
+### 2.5 Realm
+
