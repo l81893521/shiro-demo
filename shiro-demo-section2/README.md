@@ -86,3 +86,12 @@ public void testHelloworld(){
     ExpiredCredentialsException（过期的凭证）等，具体请查看其继承关系
 
 2.6 最后可以调用subject.logout退出，其会自动委托给SecurityManager.logout方法退出
+
+**从如上代码可总结出身份验证的步骤**
+1. 收集用户身份/凭证，即如用户名/密码
+2. 调用Subject.login进行登录，如果失败将得到相应的AuthenticationException异常，根据异常提示用户错误信息；否则登录成功
+3. 最后调用Subject.logout进行退出操作
+
+**如上测试的几个问题**
+1. 用户名/密码硬编码在ini配置文件，以后需要改成如数据库存储，且密码需要加密存储
+2. 用户身份Token可能不仅仅是用户名/密码，也可能还有其他的，如登录时允许用户名/邮箱/手机号同时登录
