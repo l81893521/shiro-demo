@@ -368,3 +368,10 @@ AuthenticationInfo afterAttempt(Realm realm, AuthenticationToken token, Authenti
 AuthenticationInfo afterAllAttempts(AuthenticationToken token, AuthenticationInfo aggregate)
     throws AuthenticationException;
 ```
+
+因为每个AuthenticationStrategy实例都是无状态的，所以每次都通过接口将相应的认证信息传入下一次流程；
+通过如上接口可以进行如合并/返回第一个验证成功的认证信息。
+
+自定义实现时一般继承**org.apache.shiro.authc.pam.AbstractAuthenticationStrategy**即可，
+具体可以参考代码 [查看代码](https://github.com/l81893521/shiro-demo/tree/master/shiro-demo-section2/src/test/java/org/shiro/demo/section1/authenticator/strategy)
+以及测试代码 [查看代码](https://github.com/l81893521/shiro-demo/blob/master/shiro-demo-section2/src/test/java/org/shiro/demo/section1/AuthenticatorTest.java)
