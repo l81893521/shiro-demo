@@ -600,5 +600,5 @@ public void testIsPermitted2() {
     Assert.assertTrue(getSubject().isPermitted("menu:view"));//通过MyRolePermissionResolver解析得到的权限
 }
 ```
-通过如上步骤可以实现自定义权限验证了。
+通过如上步骤可以实现自定义权限验证了.
 
