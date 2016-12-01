@@ -333,4 +333,4 @@ public void testWPermission6(){
 可以考虑比如在sql查询时加上权限字符串之类的方式在查询时就完成了权限匹配。
 
 ### 3.4授权流程
-[](https://github.com/l81893521/shiro-demo/blob/master/shiro-demo-section3/src/images/1.png)
+[](https://github.com/l81893521/shiro-demo/blob/master/shiro-demo-section3/images/1.png)
