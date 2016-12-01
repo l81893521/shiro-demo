@@ -63,7 +63,7 @@ wang=123,role1
 如果需要在应用中判断用户是否有相应角色，就需要在相应的Realm中返回角色信息，
 也就是说Shiro不负责维护用户-角色信息，需要应用提供，Shiro只是提供相应的接口方便验证，后续会介绍如何动态的获取用户角色。
 
-测试用例 [查看代码]()
+测试用例 [查看代码](https://github.com/l81893521/shiro-demo/blob/master/shiro-demo-section3/src/test/java/RoleTest.java)
 ```
 @Test
 public void testHasRole(){
@@ -77,5 +77,110 @@ public void testHasRole(){
     Assert.assertEquals(true, result[0]);
     Assert.assertEquals(true, result[1]);
     Assert.assertEquals(false, result[2]);
+}
+```
+
+Shiro提供了hasRole/hasAllRoles用于判断用户是否拥有某个角色/某些权限；
+但是没有提供如hashAnyRole用于判断是否有某些权限中的某一个。
+
+[查看代码](https://github.com/l81893521/shiro-demo/blob/master/shiro-demo-section3/src/test/java/RoleTest.java)
+```
+@Test(expected = UnauthorizedException.class)
+public void testCheckRole(){
+    login("classpath:shiro-role.ini", "zhang", "123");
+    //拥有角色 role1
+    getSubject().checkRole("role1");
+    //拥有角色 role1 and role3 抛出异常
+    getSubject().checkRoles("role1", "role3");
+}
+```
+Shiro提供的checkRole/checkRoles和hasRole/hasAllRoles不同的地方是它在判断为假的情况下会抛出UnauthorizedException异常。
+
+**基于资源的访问控制（显式角色）**
+
+1、在shiro-permission.ini配置文件配置用户拥有的角色及角色-权限关系 [查看代码](https://github.com/l81893521/shiro-demo/blob/master/shiro-demo-section3/src/test/resources/shiro-permission.ini)
+```
+#用户名=密码，角色1，角色2
+[users]
+zhang=123,role1,role2
+wang=123,role1
+#角色=权限1，权限2
+[roles]
+role1=user:create,user:update
+role2=user:create,user:delete
+```
+规则：“用户名=密码，角色1，角色2”“角色=权限1，权限2”，即首先根据用户名找到角色，然后根据角色再找到权限；
+即角色是权限集合；Shiro同样不进行权限的维护，需要我们通过Realm返回相应的权限信息。
+只需要维护“用户——角色”之间的关系即可。
+
+测试用例:[查看代码](https://github.com/l81893521/shiro-demo/blob/master/shiro-demo-section3/src/test/java/PermissionTest.java)
+```
+@Test
+public void testIsPermitted(){
+    login("classpath:shiro-permission.ini", "zhang", "123");
+    //判断是否拥有权限user:create
+    Assert.assertTrue(getSubject().isPermitted("user:create"));
+    //判断是否拥有权限user:create and user:delete
+    Assert.assertTrue(getSubject().isPermittedAll("user:create", "user:delete"));
+    //判断 没有权限 user:view
+    Assert.assertFalse(getSubject().isPermitted("user:view"));
+}
+```
+
+Shiro提供了isPermitted和isPermittedAll用于判断用户是否拥有某个权限或所有权限，
+也没有提供如isPermittedAny用于判断拥有某一个权限的接口。
+
+测试用例:[查看代码](https://github.com/l81893521/shiro-demo/blob/master/shiro-demo-section3/src/test/java/PermissionTest.java)
+```
+@Test(expected = UnauthorizedException.class)
+public void testCheckPermission(){
+    login("classpath:shiro-permission.ini", "zhang", "123");
+    //拥有权限 user:create
+    getSubject().checkPermission("user:create");
+    //拥有权限 user:delete and user:update
+    getSubject().checkPermissions("user:delete", "user:update");
+    //拥有权限 user:view 抛出错误
+    getSubject().checkPermission("user:view");
+
+}
+```
+Shiro提供的checkPermission/checkPermissions和isPermitted/isPermittedAll不同的地方是它在判断为假的情况下会抛出UnauthorizedException异常。
+
+到此基于资源的访问控制（显示角色）就完成了，也可以叫基于权限的访问控制，这种方式的一般规则是“资源标识符：操作”，即是资源级别的粒度；
+这种方式的好处就是如果要修改基本都是一个资源级别的修改，不会对其他模块代码产生影响，粒度小。但是实现起来可能稍微复杂点，需要维护“用户——角色，角色——权限（资源：操作）”之间的关系。
+
+###3.3 Permission
+
+**字符串通配符权限**
+
+规则：“资源标识符：操作：对象实例ID”  即对哪个资源的哪个实例可以进行什么操作。
+
+其默认支持通配符权限字符串，“:”表示资源/操作/实例的分割；“,”表示操作的分割；“*”表示任意资源/操作/实例。
+
+**单资源单权限**
+```
+subject().checkPermissions("system:user:update");
+```
+
+**单资源多权限**
+
+ini配置文件 [查看代码](https://github.com/l81893521/shiro-demo/blob/master/shiro-demo-section3/src/test/resources/shiro-permission.ini)
+```
+#对资源user拥有update,delete权限
+role41=system:user:update,system:user:delete
+```
+也可以简写成
+```
+#对资源user拥有update,delete权限,需要加双引号(简写,但不等价)
+role42:"system:user:update,delete"
+```
+测试用例 [查看代码](https://github.com/l81893521/shiro-demo/blob/master/shiro-demo-section3/src/test/java/PermissionTest.java)
+```
+@Test
+public void testWPermission1(){
+    login("classpath:shiro-permission.ini", "li", "123");
+
+    getSubject().checkPermissions("system:user:update","system:user:delete");
+    getSubject().checkPermissions("system:user:update,delete");
 }
 ```
