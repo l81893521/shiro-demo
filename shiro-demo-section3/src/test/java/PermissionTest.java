@@ -29,4 +29,12 @@ public class PermissionTest extends BaseTest {
         getSubject().checkPermission("user:view");
 
     }
+
+    @Test
+    public void testWPermission1(){
+        login("classpath:shiro-permission.ini", "li", "123");
+
+        getSubject().checkPermissions("system:user:update","system:user:delete");
+        getSubject().checkPermissions("system:user:update,delete");
+    }
 }
