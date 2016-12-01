@@ -37,4 +37,36 @@ public class PermissionTest extends BaseTest {
         getSubject().checkPermissions("system:user:update","system:user:delete");
         getSubject().checkPermissions("system:user:update,delete");
     }
+
+    @Test
+    public void testWPermission2(){
+        login("classpath:shiro-permission.ini", "li", "123");
+
+        getSubject().checkPermissions("system:user:create,update,delete,view");
+        getSubject().checkPermissions("system:user:*");
+        getSubject().checkPermissions("system:user");
+    }
+
+    @Test
+    public void testWPermission3(){
+        login("classpath:shiro-permission.ini", "li", "123");
+
+        getSubject().checkPermissions("user:view");
+        getSubject().checkPermissions("system:user:view");
+    }
+
+    @Test
+    public void testWPermission4(){
+        login("classpath:shiro-permission.ini", "li", "123");
+        //单实例单权限
+        getSubject().checkPermission("user:view:1");
+        //单实例多权限
+        getSubject().checkPermissions("user:update:1","user:delete:1");
+        //单实例全部权限
+        getSubject().checkPermissions("user:eat:1","user:drink:1","user:run:1");
+        //多实例单权限
+        getSubject().checkPermissions("user:auth:1","user:auth:2","user:auth:3");
+        //多实例多权限
+        getSubject().checkPermissions("user:anything:anyone","user:anything-1:anyone-1","user:anything-2:anyone-2");
+    }
 }
