@@ -324,3 +324,13 @@ public void testWPermission6(){
     getSubject().checkPermission(new WildcardPermission("eat"));
 }
 ```
+
+**性能问题**
+
+通配符匹配方式比字符串相等匹配来说是更复杂的，因此需要花费更长时间，但是一般系统的权限不会太多，
+且可以配合缓存来提供其性能，如果这样性能还达不到要求我们可以实现位操作算法实现性能更好的权限匹配。
+另外实例级别的权限验证如果数据量太大也不建议使用，可能造成查询权限及匹配变慢。
+可以考虑比如在sql查询时加上权限字符串之类的方式在查询时就完成了权限匹配。
+
+### 3.4授权流程
+[](https://github.com/l81893521/shiro-demo/blob/master/shiro-demo-section3/src/images/1.png)
