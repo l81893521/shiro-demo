@@ -1,4 +1,5 @@
 import org.apache.shiro.authz.UnauthorizedException;
+import org.apache.shiro.authz.permission.WildcardPermission;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -68,5 +69,20 @@ public class PermissionTest extends BaseTest {
         getSubject().checkPermissions("user:auth:1","user:auth:2","user:auth:3");
         //多实例多权限
         getSubject().checkPermissions("user:anything:anyone","user:anything-1:anyone-1","user:anything-2:anyone-2");
+    }
+
+    @Test
+    public void testWPermission5(){
+        login("classpath:shiro-permission.ini", "li", "123");
+        getSubject().checkPermissions("eat");
+        getSubject().checkPermissions("eat:chicken");
+        getSubject().checkPermissions("eat:chicken:wing");
+    }
+
+    @Test
+    public void testWPermission6(){
+        login("classpath:shiro-permission.ini", "li", "123");
+        getSubject().checkPermission("eat");
+        getSubject().checkPermission(new WildcardPermission("eat"));
     }
 }

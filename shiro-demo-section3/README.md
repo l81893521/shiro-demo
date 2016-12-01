@@ -184,3 +184,143 @@ public void testWPermission1(){
     getSubject().checkPermissions("system:user:update,delete");
 }
 ```
+
+**单资源全部权限**
+ini配置文件 [查看代码](https://github.com/l81893521/shiro-demo/blob/master/shiro-demo-section3/src/test/resources/shiro-permission.ini)
+```
+#对资源user拥有create,update,delete,view权限
+role51:"system:user:create,update,delete,view"
+```
+或者(推荐)
+```
+#对资源user拥有所有权限
+role52:system:user:*
+```
+或者
+```
+#对资源user拥有所有权限
+role53:system:user
+```
+测试用例 [查看代码](https://github.com/l81893521/shiro-demo/blob/master/shiro-demo-section3/src/test/java/PermissionTest.java)
+```
+@Test
+public void testWPermission2(){
+    login("classpath:shiro-permission.ini", "li", "123");
+
+    getSubject().checkPermissions("system:user:create,update,delete,view");
+    getSubject().checkPermissions("system:user:*");
+    getSubject().checkPermissions("system:user");
+}
+```
+
+**所有资源指定权限**
+ini配置文件 [查看代码](https://github.com/l81893521/shiro-demo/blob/master/shiro-demo-section3/src/test/resources/shiro-permission.ini)
+```
+#对所有资源拥有view权限(如匹配user:view)
+role61=*:view
+#对所有资源拥有view权限(如匹配system:user:view)
+role62=*:*:view
+```
+测试用例 [查看代码](https://github.com/l81893521/shiro-demo/blob/master/shiro-demo-section3/src/test/java/PermissionTest.java)
+```
+@Test
+public void testWPermission3(){
+    login("classpath:shiro-permission.ini", "li", "123");
+
+    getSubject().checkPermissions("user:view");
+    getSubject().checkPermissions("system:user:view");
+}
+```
+
+**单个实例单个权限**
+```
+#对资源user的1实例拥有view权限
+role71=user:view:1
+```
+**单个实例多个权限**
+```
+#对资源user的1实例拥有update,delete权限
+role72="user:update,delete:1"
+```
+**单个实例所有权限**
+```
+#对资源user的1实例拥有所有权限
+role73=user:*:1
+```
+**所有实例单个权限**
+```
+#对资源user的所有实例拥有auth权限
+role74=user:auth:*
+```
+**所有实例所有权限**
+```
+#对资源user的所有实例拥有所有权限
+role75=user:*:*
+```
+ini配置文件 [查看代码](https://github.com/l81893521/shiro-demo/blob/master/shiro-demo-section3/src/test/resources/shiro-permission.ini)
+
+测试用例 [查看代码](https://github.com/l81893521/shiro-demo/blob/master/shiro-demo-section3/src/test/java/PermissionTest.java)
+```
+@Test
+public void testWPermission4(){
+    login("classpath:shiro-permission.ini", "li", "123");
+    //单实例单权限
+    getSubject().checkPermission("user:view:1");
+    //单实例多权限
+    getSubject().checkPermissions("user:update:1","user:delete:1");
+    //单实例全部权限
+    getSubject().checkPermissions("user:eat:1","user:drink:1","user:run:1");
+    //多实例单权限
+    getSubject().checkPermissions("user:auth:1","user:auth:2","user:auth:3");
+    //多实例多权限
+    getSubject().checkPermissions("user:anything:anyone","user:anything-1:anyone-1","user:anything-2:anyone-2");
+}
+```
+
+**权限字符串缺失部分的处理**
+
+如“user:view”等价于“user:view:*”；
+
+而“organization”等价于“organization:*”或者“organization:*:*”。
+
+可以这么理解，这种方式实现了前缀匹配。
+
+另外如“user:*”可以匹配如“user:delete”
+
+“user:delete”可以匹配如“user:delete:1”
+
+“user:*:1”可以匹配如“user:view:1”
+
+“user”可以匹配“user:view”或“user:view:1”等。
+
+即*可以匹配所有，不加*可以进行前缀匹配；
+
+但是如“*:view”不能匹配“system:user:view”，需要使用“*:*:view”，即后缀匹配必须指定前缀（多个冒号就需要多个*来匹配）。
+
+ini配置文件 [查看代码](https://github.com/l81893521/shiro-demo/blob/master/shiro-demo-section3/src/test/resources/shiro-permission.ini)
+```
+#可匹配eat, eat:*, eat:*:*
+role81=eat
+```
+测试用例 [查看代码](https://github.com/l81893521/shiro-demo/blob/master/shiro-demo-section3/src/test/java/PermissionTest.java)
+```
+@Test
+public void testWPermission5(){
+    login("classpath:shiro-permission.ini", "li", "123");
+    getSubject().checkPermissions("eat");
+    getSubject().checkPermissions("eat:chicken");
+    getSubject().checkPermissions("eat:chicken:wing");
+}
+```
+
+**WildcardPermission**
+
+以下两种方式是等价的 [查看代码](https://github.com/l81893521/shiro-demo/blob/master/shiro-demo-section3/src/test/java/PermissionTest.java)
+```
+@Test
+public void testWPermission6(){
+    login("classpath:shiro-permission.ini", "li", "123");
+    getSubject().checkPermission("eat");
+    getSubject().checkPermission(new WildcardPermission("eat"));
+}
+```
