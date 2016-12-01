@@ -361,4 +361,25 @@ Authorizer的职责是进行授权（访问控制），是Shiro API中授权核�
 具体请参考其Javadoc。SecurityManager继承了Authorizer接口，且提供了ModularRealmAuthorizer用于多Realm时的授权匹配。
 PermissionResolver用于解析权限字符串到Permission实例，而RolePermissionResolver用于根据角色解析相应的权限集合。
 
+我们可以通过如下ini配置更改Authorizer实现：
+```
+authorizer=org.apache.shiro.authz.ModularRealmAuthorizer
+securityManager.authorizer=$authorizer
+```
+对于ModularRealmAuthorizer，相应的AuthorizingSecurityManager会在初始化完成后自动将相应的realm设置进去，我们也可以通过调用其setRealms()方法进行设置。
+对于实现自己的authorizer可以参考ModularRealmAuthorizer实现即可，在此就不提供示例了。
+
+设置ModularRealmAuthorizer的permissionResolver，其会自动设置到相应的Realm上（其实现了PermissionResolverAware接口），如：
+```
+permissionResolver=org.apache.shiro.authz.permission.WildcardPermissionResolver
+authorizer.permissionResolver=$permissionResolver
+```
+设置ModularRealmAuthorizer的rolePermissionResolver，其会自动设置到相应的Realm上（其实现了RolePermissionResolverAware接口），如：
+```
+rolePermissionResolver=com.github.zhangkaitao.shiro.chapter3.permission.MyRolePermissionResolver
+authorizer.rolePermissionResolver=$rolePermissionResolver
+```
+
+
+
 

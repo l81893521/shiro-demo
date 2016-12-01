@@ -1,6 +1,8 @@
 /target
 /bin
 /.settings
+/.idea
 .classpath
 .project
 .DS_Store
+*.iml
