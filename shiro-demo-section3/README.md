@@ -49,4 +49,33 @@ JSP/GSP标签：在JSP/GSP页面通过相应的标签完成：
 后续部分将详细介绍如何使用。
 
 ### 3.2 授权
-**基于角色的访问控制（隐式角色**
+**基于角色的访问控制（隐式角色）**
+
+shiro-role.ini配置文件配置用户拥有的角色 [查看代码](https://github.com/l81893521/shiro-demo/blob/master/shiro-demo-section3/src/test/resources/shiro-role.ini)
+```
+#用户名=密码,角色1,角色2
+[users]
+zhang=123,role1,role2
+wang=123,role1
+```
+
+规则即：“用户名=密码,角色1,角色2”
+如果需要在应用中判断用户是否有相应角色，就需要在相应的Realm中返回角色信息，
+也就是说Shiro不负责维护用户-角色信息，需要应用提供，Shiro只是提供相应的接口方便验证，后续会介绍如何动态的获取用户角色。
+
+测试用例 [查看代码]()
+```
+@Test
+public void testHasRole(){
+    login("classpath:shiro-role.ini", "zhang", "123");
+    //判断是否拥有角色 role1
+    Assert.assertTrue(getSubject().hasRole("role1"));
+    //判断是否拥有角色 role1 和 role2
+    Assert.assertTrue(getSubject().hasAllRoles(Arrays.asList("role1", "role2")));
+    //判断是否拥有角色 role1 and role2 and !role3
+    boolean[] result = getSubject().hasRoles(Arrays.asList("role1", "role2", "role3"));
+    Assert.assertEquals(true, result[0]);
+    Assert.assertEquals(true, result[1]);
+    Assert.assertEquals(false, result[2]);
+}
+```
