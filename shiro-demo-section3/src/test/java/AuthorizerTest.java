@@ -11,12 +11,12 @@ public class AuthorizerTest extends BaseTest {
         login("classpath:shiro-authorizer.ini", "zhang", "123");
 //        Assert.assertTrue(getSubject().isPermitted("user1:update"));
 //        Assert.assertTrue(getSubject().isPermitted("user2:update"));
-
-        Assert.assertTrue(getSubject().isPermitted("+user1+2"));//新增权限
-        Assert.assertTrue(getSubject().isPermitted("+user1+8"));//查看权限
-        Assert.assertTrue(getSubject().isPermitted("+user2+10"));//新增及查看
-
-        Assert.assertFalse(getSubject().isPermitted("+user1+4"));//没有删除权限
+//
+//        Assert.assertTrue(getSubject().isPermitted("+user1+2"));//新增权限
+//        Assert.assertTrue(getSubject().isPermitted("+user1+8"));//查看权限
+//        Assert.assertTrue(getSubject().isPermitted("+user2+10"));//新增及查看
+//
+//        Assert.assertFalse(getSubject().isPermitted("+user1+4"));//没有删除权限
 
         Assert.assertTrue(getSubject().isPermitted("menu:view"));//通过MyRolePermissionResolver解析得到的权限
     }

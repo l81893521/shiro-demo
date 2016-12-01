@@ -380,6 +380,225 @@ rolePermissionResolver=com.github.zhangkaitao.shiro.chapter3.permission.MyRolePe
 authorizer.rolePermissionResolver=$rolePermissionResolver
 ```
 
+shiro-authorizer.ini配置 [查看代码](https://github.com/l81893521/shiro-demo/blob/master/shiro-demo-section3/src/test/resources/shiro-authorizer.ini)
+```
+#自定义authorizer
+authorizer=org.apache.shiro.authz.ModularRealmAuthorizer
+#authorizer=自己的Authorizer
+#自定义permissionResolver
+#permissionResolver=org.apache.shiro.authz.permission.WildcardPermissionResolver
+permissionResolver=permission.BitAndWildPermissionResolver
+authorizer.permissionResolver=$permissionResolver
+#自定义rolePermissionResolver
+rolePermissionResolver=permission.MyRolePermissionResolver
+authorizer.rolePermissionResolver=$rolePermissionResolver
 
+securityManager.authorizer=$authorizer
 
+#自定义realm 一定要放在securityManager.authorizer赋值之后（因为调用setRealms会将realms设置给authorizer，并给各个Realm设置permissionResolver和rolePermissionResolver）
+realm=realm.MyRealm
+securityManager.realms=$realm
+```
+设置securityManager 的realms一定要放到最后，因为在调用SecurityManager.setRealms时会将realms设置给authorizer，并为各个Realm设置permissionResolver和rolePermissionResolver。
+另外，不能使用IniSecurityManagerFactory创建的IniRealm，因为其初始化顺序的问题可能造成后续的初始化Permission造成影响。
+
+**定义BitAndWildPermissionResolver及BitPermission**
+
+BitPermission用于实现位移方式的权限，如规则是：
+
+权限字符串格式：+资源字符串+权限位+实例ID；以+开头中间通过+分割；
+
+权限：0 表示所有权限；1 新增（二进制：0001）、2 修改（二进制：0010）、4 删除（二进制：0100）、8 查看（二进制：1000）；
+
+如 +user+10 表示对资源user拥有修改/查看权限。
+
+BitPermission.java [查看代码](https://github.com/l81893521/shiro-demo/blob/master/shiro-demo-section3/src/test/java/permission/BitPermission.java)
+```
+private String resourcesIdentify;
+private int permissionBit;
+private String instanceId;
+
+public BitPermission(String permissionString) {
+    String[] array = permissionString.split("\\+");
+    if(array.length > 1){
+        resourcesIdentify = array[1];
+    }
+    if(StringUtils.isEmpty(resourcesIdentify)){
+        resourcesIdentify = "*";
+    }
+    if(array.length > 2){
+        permissionBit = Integer.valueOf(array[2]);
+    }
+    if(array.length > 3){
+        instanceId = array[3];
+    }
+    if(StringUtils.isEmpty(instanceId)){
+        instanceId = "*";
+    }
+}
+
+public boolean implies(Permission permission) {
+    if(!(permission instanceof  BitPermission)){
+        return false;
+    }
+    //需要验证的权限
+    BitPermission other = (BitPermission) permission;
+    if(!"*".equals(this.resourcesIdentify) && !this.resourcesIdentify.equals(other.resourcesIdentify)){
+        return false;
+    }
+    if(this.permissionBit != 0 && (this.permissionBit & other.permissionBit) == 0){
+        return false;
+    }
+    if(!"*".equals(instanceId) && !this.instanceId.equals(other.instanceId)){
+        return false;
+    }
+    return true;
+}
+```
+Permission接口提供了boolean implies(Permission p)方法用于判断权限匹配的
+
+BitAndWildPermissionResolver.java [查看代码](https://github.com/l81893521/shiro-demo/blob/master/shiro-demo-section3/src/test/java/permission/BitAndWildPermissionResolver.java)
+```
+public class BitAndWildPermissionResolver implements PermissionResolver{
+    public Permission resolvePermission(String permissionString) {
+        if(permissionString.startsWith("+")){
+            return new BitPermission(permissionString);
+        }
+        return new WildcardPermission(permissionString);
+    }
+}
+```
+BitAndWildPermissionResolver实现了PermissionResolver接口，
+并根据权限字符串是否以“+”开头来解析权限字符串为BitPermission或WildcardPermission。
+
+**定义MyRolePermissionResolver**
+
+MyRolePermissionResolver.java [查看代码](https://github.com/l81893521/shiro-demo/blob/master/shiro-demo-section3/src/test/java/permission/MyRolePermissionResolver.java)
+```
+public class MyRolePermissionResolver implements RolePermissionResolver{
+    public Collection<Permission> resolvePermissionsInRole(String roleString) {
+        if("role1".equals(roleString)) {
+            return Arrays.asList((Permission)new WildcardPermission("menu:*"));
+        }
+        return null;
+    }
+}
+```
+此处的实现很简单，如果用户拥有role1，那么就返回一个“menu:*”的权限。
+
+**shiro默认没有实现RolePermissionResolver接口,通常需要我们手动实现处理角色和权限的关系**
+
+**自定义Realm**
+
+MyRealm.java [查看代码](https://github.com/l81893521/shiro-demo/blob/master/shiro-demo-section3/src/test/java/realm/MyRealm.java)
+```
+public class MyRealm extends AuthorizingRealm {
+
+    protected AuthorizationInfo doGetAuthorizationInfo(PrincipalCollection principalCollection) {
+        SimpleAuthorizationInfo authorizationInfo = new SimpleAuthorizationInfo();
+        authorizationInfo.addRole("role1");
+        authorizationInfo.addRole("role2");
+        authorizationInfo.addObjectPermission(new BitPermission("+user1+10"));
+        authorizationInfo.addObjectPermission(new WildcardPermission("user1:*"));
+        authorizationInfo.addStringPermission("+user2+10");
+        authorizationInfo.addStringPermission("user2:*");
+        return authorizationInfo;
+    }
+
+    protected AuthenticationInfo doGetAuthenticationInfo(AuthenticationToken authenticationToken) throws AuthenticationException {
+        String username = (String) authenticationToken.getPrincipal();  //得到用户名
+        String password = new String((char[]) authenticationToken.getCredentials()); //得到密码
+        if (!"zhang".equals(username)) {
+            throw new UnknownAccountException(); //如果用户名错误
+        }
+        if (!"123".equals(password)) {
+            throw new IncorrectCredentialsException(); //如果密码错误
+        }
+        //如果身份认证验证成功，返回一个AuthenticationInfo实现；
+        return new SimpleAuthenticationInfo(username, password, getName());
+    }
+}
+```
+
+此时我们继承AuthorizingRealm而不是实现Realm接口；推荐使用AuthorizingRealm，因为：
+* AuthenticationInfo doGetAuthenticationInfo(AuthenticationToken token)：表示获取身份验证信息；
+* AuthorizationInfo doGetAuthorizationInfo(PrincipalCollection principals)：表示根据用户身份获取所拥有的权限信息。
+
+这种方式的好处是当只需要身份验证时只需要获取身份验证信息而不需要获取授权信息。对于AuthenticationInfo和AuthorizationInfo请参考其Javadoc获取相关接口信息。
+
+**另外我们可以使用JdbcRealm，需要做的操作如下**
+1. 执行sql/shiro-init-data.sql [查看代码](https://github.com/l81893521/shiro-demo/blob/master/shiro-demo-section3/src/sql/shiro-init-data.sql)
+```
+delete from users;
+delete from user_roles;
+delete from roles_permissions;
+insert into users(username, password, password_salt) values('zhang', '123', null);
+insert into user_roles(username, role_name) values('zhang', 'role1');
+insert into user_roles(username, role_name) values('zhang', 'role2');
+insert into roles_permissions(role_name, permission) values('role1', '+user1+10');
+insert into roles_permissions(role_name, permission) values('role1', 'user1:*');
+insert into roles_permissions(role_name, permission) values('role1', '+user2+10');
+insert into roles_permissions(role_name, permission) values('role1', 'user2:*');
+```
+2. 使用shiro-jdbc-authorizer.ini配置文件 [查看代码](https://github.com/l81893521/shiro-demo/blob/master/shiro-demo-section3/src/test/resources/shiro-jdbc-authorizer.ini)
+```
+#自定义authorizer
+authorizer=org.apache.shiro.authz.ModularRealmAuthorizer
+#authorizer=自己的Authorizer
+#自定义permissionResolver
+#permissionResolver=org.apache.shiro.authz.permission.WildcardPermissionResolver
+permissionResolver=permission.BitAndWildPermissionResolver
+authorizer.permissionResolver=$permissionResolver
+#自定义rolePermissionResolver
+rolePermissionResolver=permission.MyRolePermissionResolver
+authorizer.rolePermissionResolver=$rolePermissionResolver
+
+securityManager.authorizer=$authorizer
+
+dataSource=com.alibaba.druid.pool.DruidDataSource
+dataSource.driverClassName=com.mysql.jdbc.Driver
+dataSource.url=jdbc:mysql://192.168.31.188:3306/shiro
+dataSource.username=root
+dataSource.password=YEEkoo@2016
+#自定义realm 一定要放在securityManager.authorizer赋值之后（因为调用setRealms会将realms设置给authorizer，并给各个Realm设置permissionResolver和rolePermissionResolver）
+jdbcRealm=org.apache.shiro.realm.jdbc.JdbcRealm
+jdbcRealm.dataSource=$dataSource
+jdbcRealm.permissionsLookupEnabled=true
+securityManager.realms=$jdbcRealm
+```
+
+测试用例 [查看代码](https://github.com/l81893521/shiro-demo/blob/master/shiro-demo-section3/src/test/java/AuthorizerTest.java)
+```
+@Test
+public void testIsPermitted() {
+    login("classpath:shiro-authorizer.ini", "zhang", "123");
+    Assert.assertTrue(getSubject().isPermitted("user1:update"));
+    Assert.assertTrue(getSubject().isPermitted("user2:update"));
+
+    Assert.assertTrue(getSubject().isPermitted("+user1+2"));//新增权限
+    Assert.assertTrue(getSubject().isPermitted("+user1+8"));//查看权限
+    Assert.assertTrue(getSubject().isPermitted("+user2+10"));//新增及查看
+
+    Assert.assertFalse(getSubject().isPermitted("+user1+4"));//没有删除权限
+
+    Assert.assertTrue(getSubject().isPermitted("menu:view"));//通过MyRolePermissionResolver解析得到的权限
+}
+
+@Test
+public void testIsPermitted2() {
+    login("classpath:shiro-jdbc-authorizer.ini", "zhang", "123");
+    //判断拥有权限：user:create
+    Assert.assertTrue(getSubject().isPermitted("user1:update"));
+    Assert.assertTrue(getSubject().isPermitted("user2:update"));
+    //通过二进制位的方式表示权限
+    Assert.assertTrue(getSubject().isPermitted("+user1+2"));//新增权限
+    Assert.assertTrue(getSubject().isPermitted("+user1+8"));//查看权限
+    Assert.assertTrue(getSubject().isPermitted("+user2+10"));//新增及查看
+
+    Assert.assertFalse(getSubject().isPermitted("+user1+4"));//没有删除权限
+
+    Assert.assertTrue(getSubject().isPermitted("menu:view"));//通过MyRolePermissionResolver解析得到的权限
+}
+```
+通过如上步骤可以实现自定义权限验证了。
 
