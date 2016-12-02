@@ -218,7 +218,7 @@ role2=*
 
 **[urls]部分**
 
-配置url及相应的拦截器之间的关系，格式：“url=拦截器[参数]，拦截器[参数]，如：
+配置url及相应的拦截器之间的关系,格式：“url=拦截器[参数]，拦截器[参数]，如：
 ```
 [urls]
 /admin/** = authc, roles[admin], perms["permission1"]
