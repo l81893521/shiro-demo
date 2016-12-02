@@ -51,7 +51,7 @@ public void test(){
     Assert.assertTrue(subject.isAuthenticated());
 }
 ```
-等价的ini配置 [查看代码]()
+等价的ini配置 [查看代码](https://github.com/l81893521/shiro-demo/blob/master/shiro-demo-section4/src/test/resources/shiro-config.ini)
 ```
 #默认就是DefaultSecurityManager,可写可不写,也可以覆盖
 #securityManager=org.apache.shiro.mgt.DefaultSecurityManager
@@ -81,7 +81,7 @@ jdbcRealm.dataSource=$dataSource
 jdbcRealm.permissionsLookupEnabled=true
 securityManager.realms=$jdbcRealm
 ```
-测试用例 [查看代码]()
+测试用例 [查看代码](https://github.com/l81893521/shiro-demo/blob/master/shiro-demo-section4/src/test/java/ConfigurationCreateTest.java)
 ```
 @Test
 public void test(){
@@ -105,3 +105,122 @@ public void test(){
 3. 接着获取SecuriyManager实例，后续步骤和之前的一样。
 
 ###4.2 INI配置
+
+ini配置文件类似于Java中的properties（key=value），不过提供了将key/value分类的特性，
+key是每个部分不重复即可，而不是整个配置文件。
+
+如下是INI配置分类：
+```
+[main]
+#提供了对根对象securityManager及其依赖的配置
+securityManager=org.apache.shiro.mgt.DefaultSecurityManager
+…………
+securityManager.realms=$jdbcRealm
+
+[users]
+#提供了对用户/密码及其角色的配置，用户名=密码，角色1，角色2
+username=password,role1,role2
+
+[roles]
+#提供了角色及权限之间关系的配置，角色=权限1，权限2
+role1=permission1,permission2
+
+[urls]
+#用于web，提供了对web url拦截相关的配置，url=拦截器[参数]，拦截器
+/index.html = anon
+/admin/** = authc, roles[admin], perms["permission1"]
+```
+
+**[main]部分**
+
+提供了对根对象securityManager及其依赖对象的配置。
+```
+securityManager=org.apache.shiro.mgt.DefaultSecurityManager
+```
+其构造器必须是public空参构造器，通过反射创建相应的实例。
+
+**常量值setter注入**
+```
+dataSource.driverClassName=com.mysql.jdbc.Driver
+jdbcRealm.permissionsLookupEnabled=true
+```
+会自动调用jdbcRealm.setPermissionsLookupEnabled(true)，对于这种常量值会自动类型转换。
+
+**对象引用setter注入**
+```
+authenticator=org.apache.shiro.authc.pam.ModularRealmAuthenticator
+authenticationStrategy=org.apache.shiro.authc.pam.AtLeastOneSuccessfulStrategy
+authenticator.authenticationStrategy=$authenticationStrategy
+securityManager.authenticator=$authenticator
+```
+会自动通过securityManager.setAuthenticator(authenticator)注入引用依赖。
+
+**嵌套属性setter注入**
+```
+securityManager.authenticator.authenticationStrategy=$authenticationStrategy
+```
+
+**byte数组setter注入**
+```
+#base64 byte[]
+authenticator.bytes=aGVsbG8=
+#hex byte[]
+authenticator.bytes=0x68656c6c6f
+```
+默认需要使用Base64进行编码，也可以使用0x十六进制。
+
+**Array/Set/List setter注入**
+```
+authenticator.array=1,2,3
+authenticator.set=$jdbcRealm,$jdbcRealm
+```
+多个之间通过“，”分割。
+
+**Map setter注入**
+```
+authenticator.map=$jdbcRealm:$jdbcRealm,1:1,key:abc
+```
+即格式是：map=key：value，key：value，可以注入常量及引用值，常量的话都看作字符串（即使有泛型也不会自动造型）。
+
+**实例化/注入顺序**
+```
+realm=Realm1
+realm=Realm12
+
+authenticator.bytes=aGVsbG8=
+authenticator.bytes=0x68656c6c6f
+```
+后边的覆盖前边的注入。
+
+ini配置文件 [查看代码](https://github.com/l81893521/shiro-demo/blob/master/shiro-demo-section4/src/test/resources/shiro-main.ini)
+
+测试用例 [查看代码](https://github.com/l81893521/shiro-demo/blob/master/shiro-demo-section4/src/test/java/IniMainTest.java)
+
+**[users]部分**
+
+配置用户名/密码及其角色，格式：“用户名=密码，角色1，角色2”，角色部分可省略。如：
+```
+[users]
+zhang=123,role1,role2
+wang=123
+```
+密码一般生成其摘要/加密存储，后续章节介绍。
+
+**[roles]部分**
+
+配置角色及权限之间的关系，格式：“角色=权限1，权限2”；如：
+```
+[roles]
+role1=user:create,user:update
+role2=*
+```
+如果只有角色没有对应的权限，可以不配roles，具体规则请参考授权章节。
+
+**[urls]部分**
+
+配置url及相应的拦截器之间的关系，格式：“url=拦截器[参数]，拦截器[参数]，如：
+```
+[urls]
+/admin/** = authc, roles[admin], perms["permission1"]
+```
+具体规则参见web相关章节。
