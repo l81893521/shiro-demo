@@ -1,0 +1,11 @@
+之前章节我们已经接触过一些INI配置规则了，如果大家使用过如Spring之类的IoC/DI容器的话，Shiro提供的INI配置也是非常类似的，
+即可以理解为是一个IoC/DI容器，但是区别在于它从一个根对象securityManager开始。
+
+###4.1根对象SecurityManager
+
+从之前的Shiro架构图可以看出，Shiro是从根对象SecurityManager进行身份验证和授权的；
+也就是所有操作都是自它开始的，这个对象是线程安全且真个应用只需要一个即可，因此Shiro提供了SecurityUtils让我们绑定它为全局的，方便后续操作。
+
+因为Shiro的类都是POJO的，因此都很容易放到任何IoC容器管理。
+但是和一般的IoC容器的区别在于，Shiro从根对象securityManager开始导航；
+Shiro支持的依赖注入：public空参构造器对象的创建、setter依赖注入。

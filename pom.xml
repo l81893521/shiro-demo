@@ -9,6 +9,7 @@
 	<modules>
 		<module>shiro-demo-section2</module>
 		<module>shiro-demo-section3</module>
+		<module>shiro-demo-section4</module>
 	</modules>
 
 	<dependencies>
