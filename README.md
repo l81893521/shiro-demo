@@ -9,6 +9,8 @@
 
 [查看第四章代码-INI配置](https://github.com/l81893521/shiro-demo/tree/master/shiro-demo-section4)
 
+[查看第五章代码-编码/加密](https://github.com/l81893521/shiro-demo/tree/master/shiro-demo-section5)
+
 ## 1.1 简介
 Apache shiro是一个java安全框架. 目前, 使用Apache shiro的人越来越多, 因为它相当简单, 对比spring security, 可能没有Spring Security功能强大,
 但是在实际工作时可能并不需要那么复杂的东西,所以使用小而简单的shiro就足够了.
