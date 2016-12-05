@@ -25,6 +25,8 @@ public class MyRealm extends AuthorizingRealm{
     }
 
     protected AuthenticationInfo doGetAuthenticationInfo(AuthenticationToken token) throws AuthenticationException {
+        //将credentialsMatcher赋值给myRealm，myRealm间接继承了AuthenticatingRealm，其在调用getAuthenticationInfo方法获取到AuthenticationInfo信息后，
+        //会使用credentialsMatcher来验证凭据是否匹配，如果不匹配将抛出IncorrectCredentialsException异常。
         return new SimpleAuthenticationInfo("zhang", passwordService.encryptPassword("123"), getName());
     }
 }
