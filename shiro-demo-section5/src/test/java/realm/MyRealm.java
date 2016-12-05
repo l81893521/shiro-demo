@@ -25,6 +25,6 @@ public class MyRealm extends AuthorizingRealm{
     }
 
     protected AuthenticationInfo doGetAuthenticationInfo(AuthenticationToken token) throws AuthenticationException {
-        return new SimpleAuthenticationInfo("zhang", "123", getName());
+        return new SimpleAuthenticationInfo("zhang", passwordService.encryptPassword("123"), getName());
     }
 }
