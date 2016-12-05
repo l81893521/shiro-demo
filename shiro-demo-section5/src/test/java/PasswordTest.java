@@ -9,4 +9,9 @@ public class PasswordTest extends BaseTest{
     public void testPasswordServiceWithMyrealm(){
         login("classpath:shiro-passwordService.ini","zhang","123");
     }
+
+    @Test
+    public void testPasswordServiceWithJdbcRealm(){
+        login("classpath:shiro-jdbc-passwordService.ini","zhang","123");
+    }
 }
