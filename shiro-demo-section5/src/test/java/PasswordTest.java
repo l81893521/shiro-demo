@@ -1,5 +1,6 @@
 import org.apache.commons.beanutils.BeanUtilsBean;
 import org.apache.commons.beanutils.converters.AbstractConverter;
+import org.apache.shiro.authc.ExcessiveAttemptsException;
 import org.apache.shiro.crypto.SecureRandomNumberGenerator;
 import org.apache.shiro.crypto.hash.SimpleHash;
 import org.apache.shiro.realm.jdbc.JdbcRealm;
@@ -62,5 +63,17 @@ public class PasswordTest extends BaseTest{
         protected Class getDefaultType() {
             return null;
         }
+    }
+
+    @Test(expected = ExcessiveAttemptsException.class)
+    public void testRetryLimitHashedCredentialsMatcherWithMyRealm(){
+        for (int i = 1; i <= 5; i++) {
+            try {
+                login("classpath:shiro-retryLimitHashedCredentialsMatcher.ini", "liu", "1234");
+            } catch (Exception e){
+                //前五次会抛出IncorrectCredentialsException,忽略掉
+            }
+        }
+        login("classpath:shiro-retryLimitHashedCredentialsMatcher.ini", "liu", "1234");
     }
 }
