@@ -424,4 +424,64 @@ public void testHashedCredentialsMatcherWithJdbcRealm(){
 
 我们通过继承HashedCredentialsMatcher，且使用Ehcache记录重试次数和超时时间。
 
+[查看代码](https://github.com/l81893521/shiro-demo/blob/master/shiro-demo-section5/src/test/java/credentials/RetryLimitHashedCredentialsMatcher.java)
+```
+public class RetryLimitHashedCredentialsMatcher extends HashedCredentialsMatcher{
+
+    private Ehcache passwordRetryCache;
+
+    public RetryLimitHashedCredentialsMatcher() {
+        CacheManager cacheManager = CacheManager.newInstance(CacheManager.class.getClassLoader().getResource("ehcache.xml"));
+        passwordRetryCache = cacheManager.getCache("passwordRetryCache");
+    }
+
+    public boolean doCredentialsMatch(AuthenticationToken token, AuthenticationInfo info){
+        String username = (String) token.getPrincipal();
+
+        Element element = passwordRetryCache.get(username);
+        if(element == null){
+            element = new Element(username, new AtomicInteger(0));
+            passwordRetryCache.put(element);
+        }
+
+        AtomicInteger retryCount = (AtomicInteger) element.getObjectValue();
+
+        if(retryCount.incrementAndGet() > 5){
+            throw new ExcessiveAttemptsException();
+        }
+
+        boolean matches = super.doCredentialsMatch(token, info);
+        if(matches){
+            passwordRetryCache.remove(username);
+        }
+        return matches;
+    }
+}
+```
+
+ini配置文件 [查看代码](https://github.com/l81893521/shiro-demo/blob/master/shiro-demo-section5/src/test/resources/shiro-retryLimitHashedCredentialsMatcher.ini)
+```
+credentialsMatcher=org.apache.shiro.authc.credential.HashedCredentialsMatcher
+credentialsMatcher.hashAlgorithmName=md5
+credentialsMatcher.hashIterations=2
+credentialsMatcher.storedCredentialsHexEncoded=true
+
+myRealm=realm.MyRealm2
+myRealm.credentialsMatcher=$credentialsMatcher
+securityManager.realms=$myRealm
+```
+
+测试用例 [查看代码](https://github.com/l81893521/shiro-demo/blob/master/shiro-demo-section5/src/test/java/PasswordTest.java)
+```
+@Test(expected = ExcessiveAttemptsException.class)
+public void testRetryLimitHashedCredentialsMatcherWithMyRealm(){
+    for (int i = 1; i <= 5; i++) {
+        try {
+            login("classpath:shiro-retryLimitHashedCredentialsMatcher.ini", "liu", "1234");
+        } catch (Exception e){
+            //前五次会抛出IncorrectCredentialsException,忽略掉
+        }
+    }
+    login("classpath:shiro-retryLimitHashedCredentialsMatcher.ini", "liu", "1234");
+}
 ```
