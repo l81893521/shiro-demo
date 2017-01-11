@@ -48,5 +48,6 @@
 			<artifactId>druid</artifactId>
 			<version>1.0.26</version>
 		</dependency>
+
 	</dependencies>
 </project>
