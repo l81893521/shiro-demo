@@ -1,7 +1,9 @@
 【2.5 Realm】及【3.5 Authorizer】部分都已经详细介绍过Realm了，接下来再来看一下一般真实环境下的Realm如何实现。
 
 1. 定义实体及关系
+
 ![](https://github.com/l81893521/shiro-demo/blob/master/shiro-demo-section6/images/1.png)
+
 即用户-角色之间是多对多关系，角色-权限之间是多对多关系；且用户和权限之间通过角色建立关系；
 在系统中验证时通过权限验证，角色只是权限集合，即所谓的显式角色；
 其实权限应该对应到资源（如菜单、URL、页面按钮、Java方法等）中，即应该将权限字符串存储到资源实体中，但是目前为了简单化，直接提取一个权限表，【综合示例】部分会使用完整的表结构。
@@ -19,4 +21,7 @@
 
 角色-权限实体（角色编号、权限编号，且组合为复合主键）。
 
-sql语句[查看代码]()
+sql语句[查看代码](https://github.com/l81893521/shiro-demo/blob/master/shiro-demo-section6/sql/shiro.sql)
+
+
+
