@@ -11,6 +11,7 @@
 		<module>shiro-demo-section3</module>
 		<module>shiro-demo-section4</module>
 		<module>shiro-demo-section5</module>
+		<module>shiro-demo-section6</module>
 	</modules>
 
 	<dependencies>
