@@ -23,5 +23,15 @@
 
 sql语句[查看代码](https://github.com/l81893521/shiro-demo/blob/master/shiro-demo-section6/sql/shiro.sql)
 
+实体代码[查看代码](https://github.com/l81893521/shiro-demo/tree/master/shiro-demo-section6/src/main/java/entity)
+
+2. 环境准备
+
+为了方便数据库操作，使用了“org.springframework:spring-jdbc:4.3.5.RELEASE”依赖
+
+3. 定义Service及Dao
+
+为了实现的简单性，只实现必须的功能，其他的可以自己实现即可。
+
 
 
