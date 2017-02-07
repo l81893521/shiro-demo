@@ -437,6 +437,7 @@ new Subject.Builder().principals(身份).authenticated(true/false).buildSubject(
 也可以自己传入一个实例。
 
 对于Subject我们一般这么使用：
+
 1. 身份验证（login）
 
 2. 授权（hasRole*/isPermitted*或checkRole*/checkPermission*）
