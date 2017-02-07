@@ -10,6 +10,9 @@ import org.apache.shiro.util.ByteSource;
 import service.UserService;
 import service.UserServiceImpl;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Created by Will.Zhang on 2017/2/7 0007 15:12.
  * 推荐继承AuthorizingRealm
