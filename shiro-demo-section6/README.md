@@ -191,3 +191,70 @@ public interface MutablePrincipalCollection extends PrincipalCollection {
 比如SimpleAuthenticationInfo会合并多个Principal为一个PrincipalCollection。
 
 接下来通过示例来看看PrincipalCollection。
+
+1. 准备3个realm
+
+myRealm1
+```
+public String getName() {
+        //realm的名字为a
+        return "a";
+    }
+
+    public boolean supports(AuthenticationToken token) {
+        return token instanceof UsernamePasswordToken;
+    }
+
+    public AuthenticationInfo getAuthenticationInfo(AuthenticationToken token) throws AuthenticationException {
+        return new SimpleAuthenticationInfo(
+                "zhang", //身份 字符串类型
+                "123",   //凭据
+                getName() //Realm Name
+        );
+    }
+```
+
+myRealm2(和myRealm1是一样的)
+```
+public String getName() {
+        //realm的名字为b
+        return "b";
+    }
+
+    public boolean supports(AuthenticationToken token) {
+        return token instanceof UsernamePasswordToken;
+    }
+
+    public AuthenticationInfo getAuthenticationInfo(AuthenticationToken token) throws AuthenticationException {
+        return new SimpleAuthenticationInfo(
+                "zhang", //身份 字符串类型
+                "123",   //凭据
+                getName() //Realm Name
+        );
+    }
+```
+
+myRealm3(principal为user类型)
+
+```
+public String getName() {
+        //realm name 为 “c”
+        return "c";
+    }
+
+    public boolean supports(AuthenticationToken token) {
+        return token instanceof UsernamePasswordToken;
+    }
+
+    public AuthenticationInfo getAuthenticationInfo(AuthenticationToken token) throws AuthenticationException {
+        User user = new User("zhang", "123");
+        return new SimpleAuthenticationInfo(
+                user, //身份 User类型
+                "123",   //凭据
+                getName() //Realm Name
+        );
+    }
+```
+
+[查看代码](https://github.com/l81893521/shiro-demo/tree/master/shiro-demo-section6/src/main/java/realm)
+
