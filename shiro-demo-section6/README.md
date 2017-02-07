@@ -260,4 +260,185 @@ public String getName() {
 
 2. shiro-multirealm.ini [查看代码](https://github.com/l81893521/shiro-demo/blob/master/shiro-demo-section6/src/main/resources/shiro-multirealm.ini)
 
-3. 测试用例:[查看代码]()
+3. 测试用例:
+```
+//因为Realm里没有进行验证，所以相当于每个Realm都身份验证成功了
+        login("classpath:shiro-multirealm.ini", "zhang", "123");
+        Subject subject = getSubject();
+        //获取Principal
+        Object primaryPrincipal1 = subject.getPrincipal();
+        PrincipalCollection princialCollection = subject.getPrincipals();
+        Object primaryPrincipal2 = princialCollection.getPrimaryPrincipal();
+        //但是因为多个Realm都返回了Principal，所以此处到底是哪个是不确定的
+        Assert.assertEquals(primaryPrincipal1, primaryPrincipal2);
+
+        //返回 a b c
+        Set<String> realmNames = princialCollection.getRealmNames();
+        System.out.println(realmNames);
+
+        //因为MyRealm1和MyRealm2返回的凭据都是zhang，所以排重了
+        Set<Object> principals = princialCollection.asSet(); //asList和asSet的结果一样
+        System.out.println(principals);
+
+        //根据Realm名字获取
+        Collection<User> users = princialCollection.fromRealm("c");
+        System.out.println(users);
+```
+[查看代码](https://github.com/l81893521/shiro-demo/blob/master/shiro-demo-section6/src/test/java/realm/PrincialCollectionTest.java)
+
+因为我们的Realm中没有进行身份及凭据验证，所以相当于身份验证都是成功的，都将返回
+```
+Object primaryPrincipal1 = subject.getPrincipal();
+PrincipalCollection princialCollection = subject.getPrincipals();
+Object primaryPrincipal2 = princialCollection.getPrimaryPrincipal();
+```
+我们可以直接调用subject.getPrincipal获取PrimaryPrincipal（即所谓的第一个）；
+或者通过getPrincipals获取PrincipalCollection；
+然后通过其getPrimaryPrincipal获取PrimaryPrincipal。
+
+```
+Set<String> realmNames = princialCollection.getRealmNames();
+```
+获取所有身份验证成功的Realm名字。
+
+```
+Set<Object> principals = princialCollection.asSet();
+```
+将身份信息转换为Set/List，即使转换为List，也是先转换为Set再完成的
+
+```
+Collection<User> users = princialCollection.fromRealm("c");
+```
+根据Realm名字获取身份，因为Realm名字可以重复，所以可能多个身份，建议Realm名字尽量不要重复。
+
+###6.5 AuthorizationInfo
+
+![](https://github.com/l81893521/shiro-demo/blob/master/shiro-demo-section6/images/5.png)
+AuthorizationInfo用于聚合授权信息的：
+```
+public interface AuthorizationInfo extends Serializable {
+    Collection<String> getRoles(); //获取角色字符串信息
+    Collection<String> getStringPermissions(); //获取权限字符串信息
+    Collection<Permission> getObjectPermissions(); //获取Permission对象信息
+}
+```
+当我们使用AuthorizingRealm时，如果身份验证成功，在进行授权时就通过doGetAuthorizationInfo方法获取角色/权限信息用于授权验证。
+
+Shiro提供了一个实现SimpleAuthorizationInfo，大多数时候使用这个即可。
+
+对于Account及SimpleAccount，之前的【6.3 AuthenticationInfo】已经介绍过了，用于SimpleAccountRealm子类，实现动态角色/权限维护的。
+
+###6.6 Subject
+![](https://github.com/l81893521/shiro-demo/blob/master/shiro-demo-section6/images/6.png)
+
+Subject是Shiro的核心对象，基本所有身份验证、授权都是通过Subject完成。
+
+1. 身份信息获取
+```
+Object getPrincipal(); //Primary Principal
+PrincipalCollection getPrincipals(); // PrincipalCollection
+```
+
+2. 身份验证
+```
+void login(AuthenticationToken token) throws AuthenticationException;
+boolean isAuthenticated();
+boolean isRemembered();
+```
+通过login登录，如果登录失败将抛出相应的AuthenticationException，如果登录成功调用isAuthenticated就会返回true，
+即已经通过身份验证；如果isRemembered返回true，表示是通过记住我功能登录的而不是调用login方法登录的。
+isAuthenticated/isRemembered是互斥的，即如果其中一个返回true，另一个返回false。
+
+3. 角色授权验证
+```
+boolean hasRole(String roleIdentifier);
+boolean[] hasRoles(List<String> roleIdentifiers);
+boolean hasAllRoles(Collection<String> roleIdentifiers);
+void checkRole(String roleIdentifier) throws AuthorizationException;
+void checkRoles(Collection<String> roleIdentifiers) throws AuthorizationException;
+void checkRoles(String... roleIdentifiers) throws AuthorizationException;
+```
+hasRole*进行角色验证，验证后返回true/false；而checkRole*验证失败时抛出AuthorizationException异常。
+
+4. 权限授权验证
+```
+boolean isPermitted(String permission);
+boolean isPermitted(Permission permission);
+boolean[] isPermitted(String... permissions);
+boolean[] isPermitted(List<Permission> permissions);
+boolean isPermittedAll(String... permissions);
+boolean isPermittedAll(Collection<Permission> permissions);
+void checkPermission(String permission) throws AuthorizationException;
+void checkPermission(Permission permission) throws AuthorizationException;
+void checkPermissions(String... permissions) throws AuthorizationException;
+void checkPermissions(Collection<Permission> permissions) throws AuthorizationException;
+```
+isPermitted*进行权限验证，验证后返回true/false；而checkPermission*验证失败时抛出AuthorizationException。
+
+5. 会话
+```
+Session getSession(); //相当于getSession(true)
+Session getSession(boolean create);
+```
+类似于Web中的会话。如果登录成功就相当于建立了会话，接着可以使用getSession获取；
+如果create=false如果没有会话将返回null，而create=true如果没有会话会强制创建一个。
+
+6. 退出
+```
+void logout();
+```
+
+7. RunAs
+```
+void runAs(PrincipalCollection principals) throws NullPointerException, IllegalStateException;
+boolean isRunAs();
+PrincipalCollection getPreviousPrincipals();
+PrincipalCollection releaseRunAs();
+```
+RunAs即实现“允许A假设为B身份进行访问”；通过调用subject.runAs(b)进行访问；
+接着调用subject.getPrincipals将获取到B的身份；此时调用isRunAs将返回true；
+而a的身份需要通过subject. getPreviousPrincipals获取；如果不需要RunAs了调用subject. releaseRunAs即可。
+
+8. 多线程
+```
+<V> V execute(Callable<V> callable) throws ExecutionException;
+void execute(Runnable runnable);
+<V> Callable<V> associateWith(Callable<V> callable);
+Runnable associateWith(Runnable runnable);
+```
+实现线程之间的Subject传播，因为Subject是线程绑定的；
+因此在多线程执行中需要传播到相应的线程才能获取到相应的Subject。
+最简单的办法就是通过execute(runnable/callable实例)直接调用；
+或者通过associateWith(runnable/callable实例)得到一个包装后的实例；
+它们都是通过：1、把当前线程的Subject绑定过去；2、在线程执行结束后自动释放。
+
+Subject自己不会实现相应的身份验证/授权逻辑，而是通过DelegatingSubject委托给SecurityManager实现；
+及可以理解为Subject是一个面门。
+
+对于Subject的构建一般没必要我们去创建；一般通过SecurityUtils.getSubject()获取：
+```
+public static Subject getSubject() {
+    Subject subject = ThreadContext.getSubject();
+    if (subject == null) {
+        subject = (new Subject.Builder()).buildSubject();
+        ThreadContext.bind(subject);
+    }
+    return subject;
+}
+```
+即首先查看当前线程是否绑定了Subject，如果没有通过Subject.Builder构建一个然后绑定到现场返回。
+
+如果想自定义创建，可以通过：
+```
+new Subject.Builder().principals(身份).authenticated(true/false).buildSubject()
+```
+这种可以创建相应的Subject实例了，然后自己绑定到线程即可。
+在new Builder()时如果没有传入SecurityManager，自动调用SecurityUtils.getSecurityManager获取；
+也可以自己传入一个实例。
+
+对于Subject我们一般这么使用：
+1. 身份验证（login）
+2. 授权（hasRole*/isPermitted*或checkRole*/checkPermission*）
+3. 将相应的数据存储到会话（Session）
+4. 切换身份（RunAs）/多线程身份传播
+5. 退出
