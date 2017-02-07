@@ -333,13 +333,13 @@ Shiro提供了一个实现SimpleAuthorizationInfo，大多数时候使用这个�
 
 Subject是Shiro的核心对象，基本所有身份验证、授权都是通过Subject完成。
 
-1. 身份信息获取
+* 身份信息获取
 ```
 Object getPrincipal(); //Primary Principal
 PrincipalCollection getPrincipals(); // PrincipalCollection
 ```
 
-2. 身份验证
+* 身份验证
 ```
 void login(AuthenticationToken token) throws AuthenticationException;
 boolean isAuthenticated();
@@ -349,7 +349,7 @@ boolean isRemembered();
 即已经通过身份验证；如果isRemembered返回true，表示是通过记住我功能登录的而不是调用login方法登录的。
 isAuthenticated/isRemembered是互斥的，即如果其中一个返回true，另一个返回false。
 
-3. 角色授权验证
+* 角色授权验证
 ```
 boolean hasRole(String roleIdentifier);
 boolean[] hasRoles(List<String> roleIdentifiers);
@@ -360,7 +360,7 @@ void checkRoles(String... roleIdentifiers) throws AuthorizationException;
 ```
 hasRole*进行角色验证，验证后返回true/false；而checkRole*验证失败时抛出AuthorizationException异常。
 
-4. 权限授权验证
+* 权限授权验证
 ```
 boolean isPermitted(String permission);
 boolean isPermitted(Permission permission);
@@ -375,7 +375,7 @@ void checkPermissions(Collection<Permission> permissions) throws AuthorizationEx
 ```
 isPermitted*进行权限验证，验证后返回true/false；而checkPermission*验证失败时抛出AuthorizationException。
 
-5. 会话
+* 会话
 ```
 Session getSession(); //相当于getSession(true)
 Session getSession(boolean create);
@@ -383,12 +383,12 @@ Session getSession(boolean create);
 类似于Web中的会话。如果登录成功就相当于建立了会话，接着可以使用getSession获取；
 如果create=false如果没有会话将返回null，而create=true如果没有会话会强制创建一个。
 
-6. 退出
+* 退出
 ```
 void logout();
 ```
 
-7. RunAs
+* RunAs
 ```
 void runAs(PrincipalCollection principals) throws NullPointerException, IllegalStateException;
 boolean isRunAs();
@@ -399,7 +399,7 @@ RunAs即实现“允许A假设为B身份进行访问”；通过调用subject.ru
 接着调用subject.getPrincipals将获取到B的身份；此时调用isRunAs将返回true；
 而a的身份需要通过subject. getPreviousPrincipals获取；如果不需要RunAs了调用subject. releaseRunAs即可。
 
-8. 多线程
+* 多线程
 ```
 <V> V execute(Callable<V> callable) throws ExecutionException;
 void execute(Runnable runnable);
@@ -438,7 +438,11 @@ new Subject.Builder().principals(身份).authenticated(true/false).buildSubject(
 
 对于Subject我们一般这么使用：
 1. 身份验证（login）
+
 2. 授权（hasRole*/isPermitted*或checkRole*/checkPermission*）
+
 3. 将相应的数据存储到会话（Session）
+
 4. 切换身份（RunAs）/多线程身份传播
+
 5. 退出
