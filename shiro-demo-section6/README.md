@@ -258,3 +258,6 @@ public String getName() {
 
 [查看代码](https://github.com/l81893521/shiro-demo/tree/master/shiro-demo-section6/src/main/java/realm)
 
+2. shiro-multirealm.ini [查看代码](https://github.com/l81893521/shiro-demo/blob/master/shiro-demo-section6/src/main/resources/shiro-multirealm.ini)
+
+3. 测试用例:[查看代码]()
