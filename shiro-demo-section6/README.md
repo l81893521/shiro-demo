@@ -108,10 +108,50 @@ UserRealm:[查看代码](https://github.com/l81893521/shiro-demo/blob/master/shi
     * 最后生成AuthenticationInfo信息，交给间接父类AuthenticatingRealm使用CredentialsMatcher进行判断密码是否匹配，如果不匹配将抛出密码错误异常IncorrectCredentialsException
     * 另外如果密码重试此处太多将抛出超出重试次数异常ExcessiveAttemptsException
 
-==在组装SimpleAuthenticationInfo信息时，需要传入：身份信息（用户名）、凭据（密文密码）、盐（username+salt），CredentialsMatcher使用盐加密传入的明文密码和此处的密文密码进行匹配。==
+在组装SimpleAuthenticationInfo信息时，需要传入：身份信息（用户名）、凭据（密文密码）、盐（username+salt），CredentialsMatcher使用盐加密传入的明文密码和此处的密文密码进行匹配。
 
 3. **doGetAuthorizationInfo**获取授权信息：PrincipalCollection是一个身份集合，因为我们现在就一个Realm，所以直接调用getPrimaryPrincipal得到之前传入的用户名即可；然后根据用户名调用UserService接口获取角色及权限信息。
 
 测试用例:[查看代码](https://github.com/l81893521/shiro-demo/blob/master/shiro-demo-section6/src/test/java/realm/UserRealmTest.java)
 
+###6.2 AuthenticationToken
 
+![](https://github.com/l81893521/shiro-demo/blob/master/shiro-demo-section6/images/2.png)
+
+AuthenticationToken用于收集用户提交的身份（如用户名）及凭据（如密码）：
+
+```
+public interface AuthenticationToken extends Serializable {
+    Object getPrincipal(); //身份
+    Object getCredentials(); //凭据
+}
+```
+扩展接口RememberMeAuthenticationToken：提供了“boolean isRememberMe()”现“记住我”的功能；
+
+扩展接口是HostAuthenticationToken：提供了“String getHost()”方法用于获取用户“主机”的功能。
+
+Shiro提供了一个直接拿来用的UsernamePasswordToken，用于实现用户名/密码Token组，另外其实现了RememberMeAuthenticationToken和HostAuthenticationToken，可以实现记住我及主机验证的支持。
+
+###6.3 AuthenticationInfo
+
+![](https://github.com/l81893521/shiro-demo/blob/master/shiro-demo-section6/images/3.png)
+
+AuthenticationInfo有两个作用：
+1. 如果Realm是AuthenticatingRealm子类，则提供给AuthenticatingRealm内部使用的CredentialsMatcher进行凭据验证；（如果没有继承它需要在自己的Realm中自己实现验证）；
+
+2. 提供给SecurityManager来创建Subject（提供身份信息）；
+
+MergableAuthenticationInfo用于提供在多Realm时合并AuthenticationInfo的功能，主要合并Principal、如果是其他的如credentialsSalt，会用后边的信息覆盖前边的。
+
+比如HashedCredentialsMatcher，在验证时会判断AuthenticationInfo是否是SaltedAuthenticationInfo子类，来获取盐信息。
+
+Account相当于我们之前的User，SimpleAccount是其一个实现；
+在IniRealm、PropertiesRealm这种静态创建帐号信息的场景中使用，这些Realm直接继承了SimpleAccountRealm，而SimpleAccountRealm提供了相关的API来动态维护SimpleAccount；
+即可以通过这些API来动态增删改查SimpleAccount；动态增删改查角色/权限信息。
+及如果您的帐号不是特别多，可以使用这种方式，具体请参考SimpleAccountRealm Javadoc。
+
+其他情况一般返回SimpleAuthenticationInfo即可。
+
+###6.4 PrincipalCollection
+
+![](https://github.com/l81893521/shiro-demo/blob/master/shiro-demo-section6/images/4.png)
