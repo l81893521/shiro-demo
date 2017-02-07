@@ -155,3 +155,39 @@ Account相当于我们之前的User，SimpleAccount是其一个实现；
 ###6.4 PrincipalCollection
 
 ![](https://github.com/l81893521/shiro-demo/blob/master/shiro-demo-section6/images/4.png)
+
+因为我们可以在Shiro中同时配置多个Realm，所以身份信息可能就有多个；因此其提供了PrincipalCollection用于聚合这些身份信息
+
+```
+public interface PrincipalCollection extends Iterable, Serializable {
+    Object getPrimaryPrincipal(); //得到主要的身份
+    <T> T oneByType(Class<T> type); //根据身份类型获取第一个
+    <T> Collection<T> byType(Class<T> type); //根据身份类型获取一组
+    List asList(); //转换为List
+    Set asSet(); //转换为Set
+    Collection fromRealm(String realmName); //根据Realm名字获取
+    Set<String> getRealmNames(); //获取所有身份验证通过的Realm名字
+    boolean isEmpty(); //判断是否为空
+}
+```
+
+因为PrincipalCollection聚合了多个，此处最需要注意的是getPrimaryPrincipal，如果只有一个Principal那么直接返回即可，如果有多个Principal，则返回第一个（因为内部使用Map存储，所以可以认为是返回任意一个）；
+
+oneByType / byType根据凭据的类型返回相应的Principal；fromRealm根据Realm名字（每个Principal都与一个Realm关联）获取相应的Principal。
+
+MutablePrincipalCollection是一个可变的PrincipalCollection接口，即提供了如下可变方法：
+
+```
+public interface MutablePrincipalCollection extends PrincipalCollection {
+    void add(Object principal, String realmName); //添加Realm-Principal的关联
+    void addAll(Collection principals, String realmName); //添加一组Realm-Principal的关联
+    void addAll(PrincipalCollection principals);//添加PrincipalCollection
+    void clear();//清空
+}
+```
+
+目前Shiro只提供了一个实现SimplePrincipalCollection，还记得之前的AuthenticationStrategy实现嘛，
+用于在多Realm时判断是否满足条件的，在大多数实现中（继承了AbstractAuthenticationStrategy）afterAttempt方法会进行AuthenticationInfo（实现了MergableAuthenticationInfo）的merge，
+比如SimpleAuthenticationInfo会合并多个Principal为一个PrincipalCollection。
+
+接下来通过示例来看看PrincipalCollection。
