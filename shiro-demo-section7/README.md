@@ -135,3 +135,60 @@ url模式匹配顺序是按照在配置中的声明顺序匹配，即从头开�
 
 ### 7.4 身份验证(登录)
 
+* 首先配置需要身份验证的url
+```
+#需要验证才能访问
+/authenticated=authc
+/role=authc,roles[admin]
+/permission=authc,perms["user:create"]
+```
+
+即访问这些地址时会首先判断用户有没有登录，如果没有登录默会跳转到登录页面，默认是/login.jsp，
+可以通过在[main]部分通过如下配置修改：
+```
+#默认是/login.jsp
+authc.loginUrl=/login
+```
+
+* 登录servlet
+
+```
+@Override
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        req.getRequestDispatcher("/WEB-INF/jsp/login.jsp").forward(req, resp);
+    }
+
+    @Override
+    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        String error = null;
+
+        String username = req.getParameter("username");
+        String password = req.getParameter("password");
+
+        Subject subject = SecurityUtils.getSubject();
+        UsernamePasswordToken token = new UsernamePasswordToken(username, password);
+        token.setRememberMe(true);
+
+        try {
+            subject.login(token);
+        } catch (UnknownAccountException e) {
+            error = "用户名/密码错误";
+        } catch (IncorrectCredentialsException e) {
+            error = "用户名/密码错误";
+        } catch (AuthenticationException e) {
+            //其他错误，比如锁定，如果想单独处理请单独catch处理
+            error = "其他错误：" + e.getMessage();
+        }
+
+        if(error != null) {//出错了，返回登录页面
+            req.setAttribute("error", error);
+            req.getRequestDispatcher("/WEB-INF/jsp/login.jsp").forward(req, resp);
+        } else {//登录成功
+            req.getRequestDispatcher("/WEB-INF/jsp/loginSuccess.jsp").forward(req, resp);
+        }
+    }
+```
+
+* doGet请求时展示登录页面；
+* doPost时进行登录，登录时收集username/password参数，然后提交给Subject进行登录。如果有错误再返回到登录页面；否则跳转到登录成功页面（此处应该返回到访问登录页面之前的那个页面，或者没有上一个页面时访问主页）。
+* JSP页面请参考源码。
