@@ -12,6 +12,7 @@
 		<module>shiro-demo-section4</module>
 		<module>shiro-demo-section5</module>
 		<module>shiro-demo-section6</module>
+		<module>shiro-demo-section7</module>
 	</modules>
 
 	<dependencies>
@@ -21,6 +22,7 @@
 			<artifactId>shiro-core</artifactId>
 			<version>1.2.2</version>
 		</dependency>
+
 
 		<!-- https://mvnrepository.com/artifact/commons-logging/commons-logging -->
 		<dependency>
