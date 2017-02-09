@@ -13,6 +13,7 @@
 		<module>shiro-demo-section5</module>
 		<module>shiro-demo-section6</module>
 		<module>shiro-demo-section7</module>
+		<module>shiro-demo-section8</module>
 	</modules>
 
 	<dependencies>
