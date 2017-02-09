@@ -356,3 +356,30 @@ shiro.ini[查看代码](https://github.com/l81893521/shiro-demo/blob/master/shir
 /logout=anon
 ```
 
+* LogoutServlet[查看代码](https://github.com/l81893521/shiro-demo/blob/master/shiro-demo-section7/src/main/java/web/servlet/LogoutServlet.java)
+
+```
+@Override
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        SecurityUtils.getSubject().logout();
+        req.getRequestDispatcher("/WEB-INF/jsp/logoutSuccess.jsp").forward(req, resp);
+    }
+```
+
+直接调用Subject.logout即可，退出成功后转发/重定向到相应页面即可。
+
+* 测试
+
+首先访问http://localhost:8080/login，使用帐号“zhang/123”进行登录，登录成功后访问/logout即可退出。
+
+* Shiro也提供了logout拦截器用于退出，其是org.apache.shiro.web.filter.authc.LogoutFilter类型的实例，我们可以在shiro.ini配置文件中通过如下配置完成退出：
+```
+[main]
+logout.redirectUrl=/login
+
+[urls]
+/logout2=logout
+```
+
+* 通过logout.redirectUrl指定退出后重定向的地址；
+* 通过/logout2=logout指定退出url是/logout2。这样当我们登录成功后然后访问/logout2即可退出。
