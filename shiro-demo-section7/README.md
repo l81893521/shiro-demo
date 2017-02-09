@@ -191,4 +191,39 @@ authc.loginUrl=/login
 
 * doGet请求时展示登录页面；
 * doPost时进行登录，登录时收集username/password参数，然后提交给Subject进行登录。如果有错误再返回到登录页面；否则跳转到登录成功页面（此处应该返回到访问登录页面之前的那个页面，或者没有上一个页面时访问主页）。
-* JSP页面请参考源码。
+* JSP页面请参考源码。[查看代码](https://github.com/l81893521/shiro-demo/tree/master/shiro-demo-section7/src/main/webapp/WEB-INF/jsp)
+
+
+* 测试
+首先输入http://localhost:8080/login进行登录,登录成功后接着可以访问http://localhost:8080/authenticated来显示当前登录的用户
+(请根据自身环境决定地址是否输入项目名)
+
+```
+${subject.principal}身份验证已通过。
+```
+
+当前实现的一个缺点就是，永远返回到同一个成功页面（比如首页），在实际项目中比如支付时如果没有登录将跳转到登录页面，登录成功后再跳回到支付页面；
+对于这种功能大家可以在登录时把当前请求保存下来，然后登录成功后再重定向到该请求即可。
+
+Shiro内置了登录（身份验证）的实现：基于表单的和基于Basic的验证，其通过拦截器实现。
+
+###7.5 基于Basic的拦截器身份验证
+
+shiro-basicfilterlogin.ini配置
+
+```
+[main]
+authcBasic.applicationName=please login
+
+perms.unauthorizedUrl=/unauthorized
+roles.unauthorizedUrl=/unauthorized
+[users]
+zhang=123,admin
+wang=123
+
+[roles]
+admin=user:*,menu:*
+
+[urls]
+/role=authcBasic,roles[admin]
+```

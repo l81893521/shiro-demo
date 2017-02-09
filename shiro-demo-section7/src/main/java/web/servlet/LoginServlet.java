@@ -8,6 +8,7 @@ import org.apache.shiro.authc.UsernamePasswordToken;
 import org.apache.shiro.subject.Subject;
 
 import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -16,6 +17,7 @@ import java.io.IOException;
 /**
  * Created by Will.Zhang on 2017/2/8 0008 17:12.
  */
+@WebServlet(name = "loginServlet", urlPatterns = "/login")
 public class LoginServlet extends HttpServlet{
 
     @Override
