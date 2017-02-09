@@ -229,4 +229,74 @@ admin=user:*,menu:*
 ```
 
 * authcBasic是org.apache.shiro.web.filter.authc.BasicHttpAuthenticationFilter类型的实例，其用于实现基于Basic的身份验证；applicationName用于弹出的登录框显示信息使用，如图：
+
 ![](https://github.com/l81893521/shiro-demo/blob/master/shiro-demo-section7/src/image/1.png)
+
+* [urls]部分配置了/role地址需要走authcBasic拦截器，即如果访问/role时还没有通过身份验证那么将弹出如上图的对话框进行登录，登录成功即可访问。
+
+* 把shiroConfigLocations改为shiro-basicfilterlogin.ini即可。
+
+* 输入http://localhost:8080/role，会弹出之前的Basic验证对话框输入“zhang/123”即可登录成功进行访问。(根据自身环境是否输入项目名)
+
+### 7.6 基于表单的拦截器身份验证
+
+基于表单的拦截器身份验证和【1】类似，但是更简单，因为其已经实现了大部分登录逻辑；
+我们只需要指定：登录地址/登录失败后错误信息存哪/成功的地址即可。
+
+* shiro-formfilterlogin.ini
+```
+[main]
+authc.loginUrl=/formfilterlogin
+authc.usernameParam=username
+authc.passwordParam=password
+authc.successUrl=/
+authc.failureKeyAttribute=shiroLoginFailure
+
+perms.unauthorizedUrl=/unauthorized
+roles.unauthorizedUrl=/unauthorized
+
+[users]
+zhang=123,admin
+wang=123
+
+[roles]
+admin=user:*,menu:*
+
+[urls]
+/static/**=anon
+/formfilterlogin=authc
+/role=authc,roles[admin]
+/permission=authc,perms["user:create"]
+```
+
+* authc是org.apache.shiro.web.filter.authc.FormAuthenticationFilter类型的实例，其用于实现基于表单的身份验证；
+* 通过loginUrl指定当身份验证时的登录表单；
+* usernameParam指定登录表单提交的用户名参数名；
+* passwordParam指定登录表单提交的密码参数名；
+* successUrl指定登录成功后重定向的默认地址（默认是“/”）（如果有上一个地址会自动重定向带该地址）
+* failureKeyAttribute指定登录失败时的request属性key（默认shiroLoginFailure）；这样可以在登录表单得到该错误key显示相应的错误消息；
+
+* 把shiroConfigLocations改为shiro- formfilterlogin.ini即可。
+
+* 登录servlet[查看代码]()
+```
+@Override
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        doPost(req, resp);
+    }
+
+    @Override
+    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        String errorClassName = (String)req.getAttribute("shiroLoginFailure");
+
+        if(UnknownAccountException.class.getName().equals(errorClassName)) {
+            req.setAttribute("error", "用户名/密码错误");
+        } else if(IncorrectCredentialsException.class.getName().equals(errorClassName)) {
+            req.setAttribute("error", "用户名/密码错误");
+        } else if(errorClassName != null) {
+            req.setAttribute("error", "未知错误：" + errorClassName);
+        }
+
+        req.getRequestDispatcher("/WEB-INF/jsp/formfilterlogin.jsp").forward(req, resp);
+    }
+```
