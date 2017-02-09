@@ -229,3 +229,4 @@ admin=user:*,menu:*
 ```
 
 * authcBasic是org.apache.shiro.web.filter.authc.BasicHttpAuthenticationFilter类型的实例，其用于实现基于Basic的身份验证；applicationName用于弹出的登录框显示信息使用，如图：
+![](https://github.com/l81893521/shiro-demo/blob/master/shiro-demo-section7/src/image/1.png)
