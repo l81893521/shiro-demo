@@ -323,7 +323,7 @@ perms.unauthorizedUrl=/unauthorized
 * roles是org.apache.shiro.web.filter.authz.RolesAuthorizationFilter类型的实例，通过参数指定访问时需要的角色，如“[admin]”，如果有多个使用“，”分割，且验证时是hasAllRole验证，即且的关系
 * Perms是org.apache.shiro.web.filter.authz.PermissionsAuthorizationFilter类型的实例，和roles类似，只是验证权限字符串。
 
-RoleServlet[查看代码]()
+RoleServlet[查看代码](https://github.com/l81893521/shiro-demo/blob/master/shiro-demo-section7/src/main/java/web/servlet/RoleServlet.java)
 ```
 @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
@@ -333,7 +333,7 @@ RoleServlet[查看代码]()
     }
 ```
 
-PermissionServlet[查看代码]()
+PermissionServlet[查看代码](https://github.com/l81893521/shiro-demo/blob/master/shiro-demo-section7/src/main/java/web/servlet/PermissionServlet.java)
 ```
 @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
@@ -341,5 +341,18 @@ PermissionServlet[查看代码]()
         subject.checkPermission("user:create");
         req.getRequestDispatcher("/WEB-INF/jsp/hasPermission.jsp").forward(req, resp);
 }
+```
+
+* 首先访问http://localhost:8080/login, 使用帐号“zhang/123”进行登录
+* 再访问http://localhost:8080/role或http://localhost:8080/permission时会成功（因为其授权成功了）
+* 如果使用帐号“wang/123”登录成功后访问这两个地址会跳转到“/unauthorized”即没有授权页面
+* (根据自身环境是否输入项目名)
+
+### 7.8 退出
+
+shiro.ini[查看代码](https://github.com/l81893521/shiro-demo/blob/master/shiro-demo-section7/src/main/resources/shiro.ini)
+```
+[urls]
+/logout=anon
 ```
 
