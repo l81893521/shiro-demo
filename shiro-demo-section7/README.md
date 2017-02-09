@@ -278,7 +278,7 @@ admin=user:*,menu:*
 
 * 把shiroConfigLocations改为shiro- formfilterlogin.ini即可。
 
-* 登录servlet[查看代码]()
+* 登录servlet[查看代码](https://github.com/l81893521/shiro-demo/blob/master/shiro-demo-section7/src/main/java/web/servlet/FormFilterLoginServlet.java)
 ```
 @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
@@ -300,3 +300,46 @@ admin=user:*,menu:*
         req.getRequestDispatcher("/WEB-INF/jsp/formfilterlogin.jsp").forward(req, resp);
     }
 ```
+在登录Servlet中通过shiroLoginFailure得到authc登录失败时的异常类型名，然后根据此异常名来决定显示什么错误消息。
+
+* 测试
+输入http://localhost:8080/role，会跳转到“/formfilterlogin”登录表单，提交表单如果authc拦截器登录成功后，会直接重定向会之前的地址“/role”；
+假设我们直接访问“/formfilterlogin”的话登录成功将直接到默认的successUrl。(根据自身环境是否输入项目名)
+
+### 7.7 授权
+
+shiro.ini[查看代码](https://github.com/l81893521/shiro-demo/blob/master/shiro-demo-section7/src/main/resources/shiro.ini)
+
+```
+[main]
+roles.unauthorizedUrl=/unauthorized
+perms.unauthorizedUrl=/unauthorized
+ [urls]
+/role=authc,roles[admin]
+/permission=authc,perms["user:create"]
+```
+
+* 通过unauthorizedUrl属性指定如果授权失败时重定向到的地址
+* roles是org.apache.shiro.web.filter.authz.RolesAuthorizationFilter类型的实例，通过参数指定访问时需要的角色，如“[admin]”，如果有多个使用“，”分割，且验证时是hasAllRole验证，即且的关系
+* Perms是org.apache.shiro.web.filter.authz.PermissionsAuthorizationFilter类型的实例，和roles类似，只是验证权限字符串。
+
+RoleServlet[查看代码]()
+```
+@Override
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        Subject subject = SecurityUtils.getSubject();
+        subject.checkRole("admin");
+        req.getRequestDispatcher("/WEB-INF/jsp/hasRole.jsp").forward(req, resp);
+    }
+```
+
+PermissionServlet[查看代码]()
+```
+@Override
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        Subject subject = SecurityUtils.getSubject();
+        subject.checkPermission("user:create");
+        req.getRequestDispatcher("/WEB-INF/jsp/hasPermission.jsp").forward(req, resp);
+}
+```
+
