@@ -209,7 +209,7 @@ Shiro内置了登录（身份验证）的实现：基于表单的和基于Basic�
 
 ###7.5 基于Basic的拦截器身份验证
 
-shiro-basicfilterlogin.ini配置
+* shiro-basicfilterlogin.ini配置
 
 ```
 [main]
@@ -227,3 +227,5 @@ admin=user:*,menu:*
 [urls]
 /role=authcBasic,roles[admin]
 ```
+
+* authcBasic是org.apache.shiro.web.filter.authc.BasicHttpAuthenticationFilter类型的实例，其用于实现基于Basic的身份验证；applicationName用于弹出的登录框显示信息使用，如图：
