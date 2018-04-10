@@ -117,7 +117,7 @@ public class CodecAndCryptoTest {
     @Test
     public void testRandom(){
         SecureRandomNumberGenerator randomNumberGenerator = new SecureRandomNumberGenerator();
-        randomNumberGenerator.setSeed("123".getBytes());
+//        randomNumberGenerator.setSeed("123".getBytes());
         System.out.println(randomNumberGenerator.nextBytes().toHex());
     }
 
